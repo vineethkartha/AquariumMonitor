@@ -15,19 +15,25 @@ Install the following packages
 * python3
 * Also refer https://ben.akrin.com/raspberry-pi-servo-jitter/ for a jitter free servo experience
 
-To get the code to autostart I followed the systemctl instructions mentioned in https://learn.sparkfun.com/tutorials/how-to-run-a-raspberry-pi-program-on-startup/all
+To get the code to autostart I followed the systemctl instructions mentioned in 
+
+https://learn.sparkfun.com/tutorials/how-to-run-a-raspberry-pi-program-on-startup/all
+
+
 These services need to be created once the code is downloaded onto the Raspberry pi board.
+
+
 As Part of this project the following services are started by systemctl on rpi boot
-aquarium_server.service
-aquarium_CO2.service
-aquarium_lights.service
-aquarium_OLED.service
-aquarium_mail.service
-aquarium_Temperature.service
+1. aquarium_server.service
+2. aquarium_CO2.service
+3. aquarium_lights.service
+4. aquarium_OLED.service
+5. aquarium_mail.service
+6. aquarium_Temperature.service
 
 The Rpi GPIO pins used are
-Pin 26 for CO2 relay
-Pin 6 for Light1
-Pin 5 for Light2
-Pin 4 for 1-wire temp sensor
-Pin 18 for Fish feeder servo
+* Pin 26 for CO2 relay
+* Pin 6 for Light1
+* Pin 5 for Light2
+* Pin 4 for 1-wire temp sensor
+* Pin 18 for Fish feeder servo
