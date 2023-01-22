@@ -1,0 +1,123 @@
+from flask import Flask, render_template, request
+import datetime
+import DS18b20_Module
+import DBUtilities as dbutils
+import JSONUtilities as js
+import picamera
+import time
+import RPi.GPIO as GPIO
+
+GPIO.setmode(GPIO.BCM)
+GPIO.setwarnings(False)
+whiteLight = 6
+rgbLight = 5
+GPIO.setup(whiteLight, GPIO.OUT)
+GPIO.setup(rgbLight, GPIO.OUT)
+
+app=Flask(__name__)
+
+temperatureSensor = DS18b20_Module.DS18b20()
+
+@app.route('/')
+def index():
+    camera = picamera.PiCamera()
+    time.sleep(.5)
+    camera.resolution = (800, 600)
+    camera.vflip = True
+    camera.capture('/home/pi/AquariumMonitor/static/images/aquarium.jpg')
+    camera.close()
+
+    [co2start,co2stop] = js.getStartAndStopTime('co2')
+    [rgbstart,rgbstop] =js. getStartAndStopTime('rgb')
+    [whitestart,whitestop] = js.getStartAndStopTime('white')
+    curTime = datetime.datetime.now()
+    curTimeStr = curTime.strftime("%D  %H:%M")
+    curDate = curTime.strftime("%D")
+
+    whitemanualOverride = js.getManualOverride('white')
+    rgbmanualOverride = js.getManualOverride('rgb')
+    if whitemanualOverride:
+        whitecheckboxVal = "checked"
+    else:
+        whitecheckboxVal = ""
+
+    if rgbmanualOverride:
+        rgbcheckboxVal = "checked"
+    else:
+        rgbcheckboxVal = ""
+
+    gantChartURL = js.getGanttChartURL()
+    try:
+        curTemp,minTemp, minTempTime, maxTemp, maxTempTime,url =dbutils.getData(curDate)
+    except:
+        curTemp="NaN"
+        minTemp="NaN"
+        minTempTime="NaN"
+        maxTemp="NaN"
+        maxTempTime="NaN"
+        url = "/static/images/error.png"
+    data = {
+        'title': 'My Aquarium Page',
+        'time': curTimeStr,
+        'url': url,
+        'gantturl': gantChartURL,
+        'minTemp': minTemp,
+        'minTempTime': minTempTime,
+        'maxTemp': maxTemp,
+        'maxTempTime': maxTempTime,
+        'currentTemp': curTemp,
+        'co2start':co2start,
+        'co2stop':co2stop,
+        'rgbstart':rgbstart,
+        'rgbstop':rgbstop,
+        'whitestart':whitestart,
+        'whitestop':whitestop,
+        'snapshot':'/static/images/aquarium.jpg?'+str(time.time()),
+        'whitecheckboxVal':whitecheckboxVal,
+        'rgbcheckboxVal':rgbcheckboxVal,
+        }
+    #print('/static/images/aquarium.jpg?'+str(time.time()))
+    return render_template('index.html', **data)
+
+@app.route('/<deviceName>/<action>')
+def action(deviceName, action):
+    curTime = datetime.datetime.now().time()
+    [startTime_str,stopTime_str] = js.getStartAndStopTime(deviceName)
+    startTime = datetime.datetime.strptime(startTime_str,"%H:%M").time()
+    stopTime = datetime.datetime.strptime(stopTime_str,"%H:%M").time()
+    if deviceName == 'white':
+        device = whiteLight
+    elif deviceName == 'rgb':
+        device = rgbLight
+
+    if(curTime < startTime or curTime > stopTime):
+        if action =="toggle":
+            manual = js.getManualOverride(deviceName)
+            if manual:
+                js.updateManualOverride(deviceName, False)
+                GPIO.output(device, GPIO.LOW)
+            else:
+                js.updateManualOverride(deviceName, True)
+                GPIO.output(device, GPIO.HIGH)
+
+    return index()
+@app.route('/timer', methods=["GET","POST"])
+def timersystem():
+    if request.method == "POST":
+        startTime = request.form.get("co2_start")
+        stopTime = request.form.get("co2_stop")
+        js.updateTimers('co2', startTime, stopTime)
+
+        startTime = request.form.get("rgb_start")
+        stopTime = request.form.get("rgb_stop")
+        js.updateTimers('rgb', startTime, stopTime)
+
+        startTime = request.form.get("white_start")
+        stopTime = request.form.get("white_stop")
+        js.updateTimers('white', startTime, stopTime)
+
+        return render_template("timerset.html")
+
+if __name__=='__main__':
+    app.run(debug=True, host='0.0.0.0')
+

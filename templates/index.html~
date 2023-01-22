@@ -1,0 +1,25 @@
+<html>
+  <head>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="refresh" content="60">
+  </head>
+  <body>
+    <h1> Aquarium Temperature Monitor </h1>
+    <h2>The date and time on the server is: {{ time }}</h2>
+    <p><b>Current Temperature: {{currentTemp}}&deg;C</b> </p>
+    <p><b>Maximum Temperature: {{maxTemp}}&deg;C at {{maxTempTime}}</b> </p>
+    <p><b>Minimum Temperature: {{minTemp}}&deg;C at {{minTempTime}}</b> </p>
+    <img src="{{url}}" alt="Chart"/>
+    <form action="{{ url_for("co2system")}}" method="post">
+      <label for="start">Enter the time to turn on CO2:</label>
+      <input type="time" id="start" name="start" value={{co2start}}>
+      <br>
+      <label for="stop">Enter the time to turn off CO2:</label>
+      <input type="time" id="stop" name="stop" value={{co2stop}}>
+      <button type="submit">Set</button>
+
+      <br><br>
+      <img src="{{snapshot}}" alt="snap"/>
+  </body>
+</html>

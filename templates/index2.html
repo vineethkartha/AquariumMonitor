@@ -1,0 +1,42 @@
+<html>
+  <head>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="refresh" content=300">
+  </head>
+  <body>
+    <h1> Aquarium Temperature Monitor </h1>
+    <h2>The date and time on the server is: {{ time }}</h2>
+    <p><b>Current Temperature: {{currentTemp}}&deg;C</b> </p>
+    <p><b>Maximum Temperature: {{maxTemp}}&deg;C at {{maxTempTime}}</b> </p>
+    <p><b>Minimum Temperature: {{minTemp}}&deg;C at {{minTempTime}}</b> </p>
+    <img src="{{url}}" alt="Chart"/>       <img src="{{
+    url_for('static', filename = '/images/aquarium.jpg') }}"
+						alt="snap"/>
+    <br><br>
+    <h2> CO2 System </h2>
+    <form action="{{ url_for("timersystem")}}" method="post">
+      <label for="co2_start">Time to turn on CO2:</label>
+      <input type="time" id="co2_start" name="co2_start"
+      value={{co2start}}> &emsp;
+      <label for="co2_stop">Enter the time to turn off CO2:</label>
+      <input type="time" id="co2_stop" name="co2_stop" value={{co2stop}}>
+      <br>
+      <h2> RGB Light </h2>
+      <label for="rgb_start">Time to turn on RGB:</label>
+      <input type="time" id="rgb_start" name="rgb_start"
+      value={{rgbstart}}> &emsp;
+      <label for="rgb_stop">Enter the time to turn off RGB:</label>
+      <input type="time" id="rgb_stop" name="rgb_stop" value={{rgbstop}}>
+      <br>
+    <h2> White Light System </h2>
+      <label for="white_start">Time to turn on white light:</label>
+      <input type="time" id="white_start" name="white_start"
+      value={{whitestart}}> &emsp;
+      <label for="white_stop">Enter the time to turn off white light:</label>
+      <input type="time" id="white_stop" name="white_stop" value={{whitestop}}>
+      <button type="submit">Set</button>
+      <br><br>
+
+  </body>
+</html>

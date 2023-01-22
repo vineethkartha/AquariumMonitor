@@ -1,0 +1,10 @@
+{
+      "data": [
+            {
+                  "Device": "feeder1",
+                  "start": "19:00",
+                  "fed": false,
+                  "manual": false
+            }
+      ]
+}
