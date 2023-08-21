@@ -14,6 +14,8 @@ Install the following packages
 * sqlite
 * python3
 * Also refer https://ben.akrin.com/raspberry-pi-servo-jitter/ for a jitter free servo experience
+* sudo apt-get install python3-pil
+*  pip3 install adafruit-circuitpython-ssd1306  
 
 To get the code to autostart I followed the systemctl instructions mentioned in 
 
@@ -31,6 +33,10 @@ As Part of this project the following services are started by systemctl on rpi b
 5. aquarium_mail.service
 6. aquarium_Temperature.service
 
+These files are present in the ServiceFiles folder. Copy them over to /lib/systemd/system
+Then run the following command
+ sudo systemctl daemon-reload
+ sudo systemctl enable aquarium_*.service
 The Rpi GPIO pins used are
 * Pin 26 for CO2 relay
 * Pin 6 for Light1

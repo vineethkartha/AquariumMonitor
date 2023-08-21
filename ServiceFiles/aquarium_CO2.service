@@ -1,0 +1,9 @@
+[Unit]
+Description=Service to turn on/off the CO2 system
+After=multi-user.target
+
+[Service]
+ExecStart=/usr/bin/python3 /home/pi/AquariumMonitor/CO2System.py
+
+[Install]
+WantedBy=multi-user.target
