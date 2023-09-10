@@ -20,12 +20,13 @@ temperatureSensor = DS18b20_Module.DS18b20()
 
 @app.route('/')
 def index():
-    camera = picamera.PiCamera()
-    time.sleep(.5)
-    camera.resolution = (800, 600)
-    camera.vflip = True
-    camera.capture('/home/pi/AquariumMonitor/static/images/aquarium.jpg')
-    camera.close()
+    ## Uncomment the below camera section if you plan to use a picamera
+    #camera = picamera.PiCamera()
+    #time.sleep(.5)
+    #camera.resolution = (800, 600)
+    #camera.vflip = True
+    #camera.capture('/home/pi/AquariumMonitor/static/images/aquarium.jpg')
+    #camera.close()
 
     [co2start,co2stop] = js.getStartAndStopTime('co2')
     [rgbstart,rgbstop] =js. getStartAndStopTime('rgb')
@@ -72,7 +73,7 @@ def index():
         'rgbstop':rgbstop,
         'whitestart':whitestart,
         'whitestop':whitestop,
-        'snapshot':'/static/images/aquarium.jpg?'+str(time.time()),
+        #'snapshot':'/static/images/aquarium.jpg?'+str(time.time()), #uncomment this if using a camera
         'whitecheckboxVal':whitecheckboxVal,
         'rgbcheckboxVal':rgbcheckboxVal,
         }
