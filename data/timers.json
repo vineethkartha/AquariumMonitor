@@ -2,20 +2,20 @@
       "data": [
             {
                   "Device": "co2",
-                  "start": "08:00",
+                  "start": "10:00",
                   "stop": "15:00",
                   "manual": false
             },
             {
                   "Device": "rgb",
-                  "start": "10:00",
+                  "start": "11:00",
                   "stop": "17:00",
                   "manual": false
             },
             {
                   "Device": "white",
-                  "start": "11:00",
-                  "stop": "17:00",
+                  "start": "12:00",
+                  "stop": "16:00",
                   "manual": false
             }
       ]

@@ -11,8 +11,11 @@ GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
 whiteLight = 6
 rgbLight = 5
+co2system = 26
+
 GPIO.setup(whiteLight, GPIO.OUT)
 GPIO.setup(rgbLight, GPIO.OUT)
+GPIO.setup(co2system, GPIO.OUT)
 
 app=Flask(__name__)
 
@@ -29,14 +32,21 @@ def index():
     #camera.close()
 
     [co2start,co2stop] = js.getStartAndStopTime('co2')
-    [rgbstart,rgbstop] =js. getStartAndStopTime('rgb')
+    [rgbstart,rgbstop] =js.getStartAndStopTime('rgb')
     [whitestart,whitestop] = js.getStartAndStopTime('white')
     curTime = datetime.datetime.now()
     curTimeStr = curTime.strftime("%D  %H:%M")
     curDate = curTime.strftime("%D")
-
+    
+    co2manualOverride = js.getManualOverride('co2')
     whitemanualOverride = js.getManualOverride('white')
     rgbmanualOverride = js.getManualOverride('rgb')
+
+    if co2manualOverride:
+        co2checkboxVal = "checked"
+    else:
+        co2checkboxVal = ""
+        
     if whitemanualOverride:
         whitecheckboxVal = "checked"
     else:
@@ -76,6 +86,7 @@ def index():
         #'snapshot':'/static/images/aquarium.jpg?'+str(time.time()), #uncomment this if using a camera
         'whitecheckboxVal':whitecheckboxVal,
         'rgbcheckboxVal':rgbcheckboxVal,
+        'co2checkboxVal':co2checkboxVal,
         }
     #print('/static/images/aquarium.jpg?'+str(time.time()))
     return render_template('index.html', **data)
@@ -90,7 +101,9 @@ def action(deviceName, action):
         device = whiteLight
     elif deviceName == 'rgb':
         device = rgbLight
-
+    elif deviceName == 'co2':
+        device = co2system
+        
     if(curTime < startTime or curTime > stopTime):
         if action =="toggle":
             manual = js.getManualOverride(deviceName)

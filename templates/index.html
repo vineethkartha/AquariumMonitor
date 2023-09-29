@@ -189,7 +189,13 @@ input:checked + .slider:before {
       <table class="customTable">
         <thead>
           <tr>
-            <th colspan="2">CO2 System</th>
+            <th colspan="2">CO2 System
+	      <label class="switch">
+		<input type="checkbox"
+		       onclick="handleClick(this,'co2');" {{co2checkboxVal}}>
+		<span class="slider round"></span>
+	      </label>
+	    </th>
           </tr>
         </thead>
         <tbody>
