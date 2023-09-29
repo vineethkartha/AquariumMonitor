@@ -58,15 +58,26 @@ try:
             # Display image.
             display.image(image)
             display.show()
-            time.sleep(30)
-            display.fill(0)
-            display.show()
+            
+            time.sleep(10)
             [startTime_str,stopTime_str] = js.getStartAndStopTime('co2')
             draw.rectangle((0,0, width, height), outline = 0, fill = 0)
             draw.text((0, top), "IP: "+IPAddr+":5000" ,  font=font, fill=255)
             draw.text((0, top +8), curTimeStr ,  font=font, fill=255)
             draw.text((0, top +16), "CO2: "+startTime_str+" - "+stopTime_str ,  font=font, fill=255)
+            display.image(image)
+            display.show()
 
+            time.sleep(10)
+            draw.rectangle((0,0, width, height), outline = 0, fill = 0)
+            draw.text((0, top), "IP: "+IPAddr+":5000" ,  font=font, fill=255)
+            draw.text((0, top +8), curTimeStr ,  font=font, fill=255)
+            [startTime_str,stopTime_str] = js.getStartAndStopTime('rgb')
+            [whitestartTime_str,whitestopTime_str] = js.getStartAndStopTime('white')
+            draw.text((0, top +16), "RGB: "+startTime_str+" - "+stopTime_str ,  font=font, fill=255)
+            draw.text((0, top +24), "White: "+whitestartTime_str+" - "+whitestopTime_str ,  font=font, fill=255)
+            display.image(image)
+            display.show()
         except:
             draw.rectangle((0,0, width, height), outline = 0, fill = 0)
             draw.text((0, top), "IP: "+IPAddr+":5000" ,  font=font, fill=255)
@@ -76,7 +87,7 @@ try:
             # Display image.
             display.image(image)
             display.show()
-        time.sleep(60)                    
+        time.sleep(5)                    
 except:        
      draw.rectangle((0,0, width, height), outline = 0, fill = 0)
      draw.text((0, top), "Disconnected " ,  font=font, fill=255)    
