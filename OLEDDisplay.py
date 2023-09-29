@@ -1,6 +1,7 @@
 import time
 import socket
 import DBUtilities as dbutils
+import JSONUtilities as js
 from board import SCL, SDA
 import busio
 import datetime
@@ -57,6 +58,15 @@ try:
             # Display image.
             display.image(image)
             display.show()
+            time.sleep(30)
+            display.fill(0)
+            display.show()
+            [startTime_str,stopTime_str] = js.getStartAndStopTime('co2')
+            draw.rectangle((0,0, width, height), outline = 0, fill = 0)
+            draw.text((0, top), "IP: "+IPAddr+":5000" ,  font=font, fill=255)
+            draw.text((0, top +8), curTimeStr ,  font=font, fill=255)
+            draw.text((0, top +16), "CO2: "+startTime_str+" - "+stopTime_str ,  font=font, fill=255)
+
         except:
             draw.rectangle((0,0, width, height), outline = 0, fill = 0)
             draw.text((0, top), "IP: "+IPAddr+":5000" ,  font=font, fill=255)
