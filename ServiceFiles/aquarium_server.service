@@ -3,7 +3,7 @@ Description=Start the Aquarium monitoring server
 After=multi-user.target
 
 [Service]
-ExecStart=/usr/bin/python3 /home/pi/AquariumMonitor/AquariumMonitor.py
+ExecStart=/usr/bin/python3 /home/vineeth/AquariumMonitor/AquariumMonitor.py
 
 [Install]
 WantedBy=multi-user.target

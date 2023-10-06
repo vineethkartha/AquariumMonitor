@@ -4,7 +4,7 @@ import JSONUtilities as js
 import datetime
 import json
 
-feedingTimeFile = '/home/pi/AquariumMonitor/data/feedTime.json'
+feedingTimeFile = '/home/vineeth/AquariumMonitor/data/feedTime.json'
 def getStartTime(device):
     jsonFile = open(feedingTimeFile,'r')
     timings = json.load(jsonFile)

@@ -3,7 +3,7 @@ Description=Service to turn on/off the lights
 After=multi-user.target
 
 [Service]
-ExecStart=/usr/bin/python3 /home/pi/AquariumMonitor/LightService.py
+ExecStart=/usr/bin/python3 /home/vineeth/AquariumMonitor/LightService.py
 
 [Install]
 WantedBy=multi-user.target

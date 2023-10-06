@@ -3,7 +3,7 @@ Description=Service to record the temperature
 After=multi-user.target
 
 [Service]
-ExecStart=/usr/bin/python3 /home/pi/AquariumMonitor/TemperatureRecord.py
+ExecStart=/usr/bin/python3 /home/vineeth/AquariumMonitor/TemperatureRecord.py
 
 [Install]
 WantedBy=multi-user.target

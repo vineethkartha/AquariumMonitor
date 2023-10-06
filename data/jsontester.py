@@ -1,5 +1,5 @@
 import json
-timerFile = '/home/pi/AquariumMonitor/data/timers.json'
+timerFile = '/home/vineeth/AquariumMonitor/data/timers.json'
 
 def getStartAndStopTime(device):
     jsonFile = open(timerFile,'r')

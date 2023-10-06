@@ -28,7 +28,7 @@ def index():
     #time.sleep(.5)
     #camera.resolution = (800, 600)
     #camera.vflip = True
-    #camera.capture('/home/pi/AquariumMonitor/static/images/aquarium.jpg')
+    #camera.capture('/home/vineeth/AquariumMonitor/static/images/aquarium.jpg')
     #camera.close()
 
     [co2start,co2stop] = js.getStartAndStopTime('co2')

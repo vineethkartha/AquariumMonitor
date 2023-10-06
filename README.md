@@ -13,9 +13,12 @@ To run this project we need a Raspberry Pi board which has a wireless connection
 Install the following packages
 * sqlite
 * python3
-* Also refer https://ben.akrin.com/raspberry-pi-servo-jitter/ for a jitter free servo experience
+* sudo apt-get install python3-pigpio  #Also refer https://ben.akrin.com/raspberry-pi-servo-jitter/ for a jitter free servo experience
 * sudo apt-get install python3-pil
-*  pip3 install adafruit-circuitpython-ssd1306  
+* sudo pip3 install adafruit-circuitpython-ssd1306
+* sudo pip3 install flask
+* sudo pip3 install picamera
+
 
 To get the code to autostart I followed the systemctl instructions mentioned in 
 

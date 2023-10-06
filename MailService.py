@@ -27,7 +27,7 @@ def sendMail(listOfEmails):
     camera.vflip = True
     camera.contrast = 10
     camera.brightness = 65
-    camera.capture('/home/pi/AquariumMonitor/static/images/aquarium.jpg')
+    camera.capture('/home/vineeth/AquariumMonitor/static/images/aquarium.jpg')
     camera.close()
 
     subject = "Aquarium Status"
@@ -43,7 +43,7 @@ def sendMail(listOfEmails):
     # Add body to email
     message.attach(MIMEText(body, "plain"))
     
-    filename = "/home/pi/AquariumMonitor/static/images/aquarium.jpg"  # In same directory as script
+    filename = "/home/vineeth/AquariumMonitor/static/images/aquarium.jpg"  # In same directory as script
     
     # Open PDF file in binary mode
     with open(filename, "rb") as attachment:

@@ -3,7 +3,7 @@ Description=Service to listen to mail and respond
 After=multi-user.target
 
 [Service]
-ExecStart=/usr/bin/python3 /home/pi/AquariumMonitor/MailService.py
+ExecStart=/usr/bin/python3 /home/vineeth/AquariumMonitor/MailService.py
 
 [Install]
 WantedBy=multi-user.target

@@ -1,6 +1,6 @@
 import sqlite3
 
-dbName = '/home/pi/AquariumMonitor/data/temperatureLog.db'
+dbName = '/home/vineeth/AquariumMonitor/data/temperatureLog.db'
 
 def getData(mDate):
     connection = sqlite3.connect(dbName)

@@ -3,7 +3,7 @@ Description=Service to turn on OLED display
 After=multi-user.target
 
 [Service]
-ExecStart=/usr/bin/python3 /home/pi/AquariumMonitor/OLEDDisplay.py
+ExecStart=/usr/bin/python3 /home/vineeth/AquariumMonitor/OLEDDisplay.py
 
 [Install]
 WantedBy=multi-user.target
