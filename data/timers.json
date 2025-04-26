@@ -2,21 +2,21 @@
       "data": [
             {
                   "Device": "co2",
-                  "start": "10:00",
-                  "stop": "15:00",
+                  "start": "09:00",
+                  "stop": "16:00",
                   "manual": false
             },
             {
                   "Device": "rgb",
-                  "start": "11:00",
+                  "start": "10:00",
                   "stop": "17:00",
                   "manual": false
             },
             {
                   "Device": "white",
-                  "start": "12:00",
-                  "stop": "16:30",
-                  "manual": false
+                  "start": "10:00",
+                  "stop": "16:00",
+                  "manual": true
             }
       ]
 }

@@ -19,6 +19,8 @@ def getData(mDate):
     maxTemperature = maxData[len(maxData)-1][1]
     maxTempTime = maxData[len(maxData)-1][0]
 
+    yaxisMin = round(minTemperature - 1)
+    yaxisMax = round(maxTemperature - 1)
     labels=[]
     temp=[]
     for row in data:
@@ -29,11 +31,12 @@ def getData(mDate):
 			borderColor: 'red',
 			borderWidth: 1,
 			lineTension: 0.8,"""
+
     options = """options: {
 		title: {display: true, 
 				text: 'Temperature changes during the day',},
 		legend: {display: false,},
-		scales: {yAxes: [{ticks: {suggestedMin: 23, suggestedMax: 26,},},],},
-		},"""
+		scales: {yAxes: [{ticks: {suggestedMin:%s, suggestedMax:%s,},},],},
+		},""" %(str(yaxisMin), str(yaxisMax))
     url = "https://quickchart.io/chart?c={type:\'line\' , data:{labels:%s,datasets:[{label:\'Temperature\', data:%s, %s}]},%s}" %(labels, temp, datasetStyling, options)
     return [curTemp, minTemperature, minTempTime, maxTemperature, maxTempTime, url]

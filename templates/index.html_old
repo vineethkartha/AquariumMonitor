@@ -1,0 +1,265 @@
+<html>
+  <head>
+    <script>
+      function handleClick(cb,deviceName) {
+	  console.log('/'+deviceName+'/toggle')
+	  console.log(deviceName)
+	      window.location.href='/'+deviceName+'/toggle'
+      }
+      </script>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="refresh" content=300">
+    <style>
+      h1 {
+        -webkit-border-radius: 24px;
+        -moz-border-radius: 24px;
+        border-radius: 24px;
+        border: 0px solid #000000;
+        background-color: #87CEFA;
+        padding: 10px;
+        font-family: Verdana, Geneva, sans-serif;
+        font-size: 20pt;
+        color: #fff;
+        text-align: center;
+    }
+    table.customTable {
+        font-family: Verdana, Geneva, sans-serif;
+        width: 100%;
+        background-color: #FFFFFF;
+        border-collapse: collapse;
+        border-width: 2px;
+        border-color: #87CEFA;
+        border-style: solid;
+        color: #000000;
+    }
+    
+    table.customTable td, table.customTable th {
+        border-width: 2px;
+        border-color: #87CEFA;
+        border-style: solid;
+        padding: 5px;
+        text-align: left;
+    }
+    
+    table.customTable thead {
+        background-color: #87CEFA;
+    }
+
+    .btn {
+        background: #3498db;
+        background-image: -webkit-linear-gradient(top, #3498db, #2980b9);
+        background-image: -moz-linear-gradient(top, #3498db, #2980b9);
+        background-image: -ms-linear-gradient(top, #3498db, #2980b9);
+        background-image: -o-linear-gradient(top, #3498db, #2980b9);
+        background-image: linear-gradient(to bottom, #3498db, #2980b9);
+        -webkit-border-radius: 17;
+        -moz-border-radius: 17;
+        border-radius: 17px;
+        font-family: Georgia;
+        color: #ffffff;
+        font-size: 24px;
+        padding: 12px 20px 12px 20px;
+        text-decoration: none;
+    }
+    
+    .btn:hover {
+        background: #3cb0fd;
+        background-image: -webkit-linear-gradient(top, #3cb0fd, #3498db);
+        background-image: -moz-linear-gradient(top, #3cb0fd, #3498db);
+        background-image: -ms-linear-gradient(top, #3cb0fd, #3498db);
+        background-image: -o-linear-gradient(top, #3cb0fd, #3498db);
+        background-image: linear-gradient(to bottom, #3cb0fd, #3498db);
+        text-decoration: none;
+    }
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+  bottom: 15px;
+}
+
+.switch input { 
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+input:checked + .slider {
+  background-color: #2196F3;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #2196F3;
+}
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(26px);
+  -ms-transform: translateX(26px);
+  transform: translateX(26px);
+}
+
+/* Rounded sliders */
+.slider.round {
+  border-radius: 34px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.column {
+  float: left;
+  width: 50%;
+  padding: 5px;
+}
+
+/* Clearfix (clear floats) */
+.row::after {
+  content: "";
+  clear: both;
+  display: table;
+}
+    </style>
+  </head>
+  <body>
+    <h1>Aquarium Monitor</h1>
+    <table class="customTable">
+      <thead>
+        <tr>
+          <th width="40%">Server Timestamp</th>
+          <th>{{ time }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Current Temperature</td>
+          <td>{{currentTemp}}&deg;C</td>
+        </tr>
+        <tr>
+          <td>Maximum Temperature</td>
+          <td>{{maxTemp}}&deg;C at {{maxTempTime}}</td>
+        </tr>
+        <tr>
+          <td>Minimum Temperature</td>
+          <td>{{minTemp}}&deg;C at {{minTempTime}}</td>
+        </tr>
+      </tbody>
+    </table>
+    <br />
+<div class="row">
+  <div class="column">
+    <img src="{{gantturl}}" alt="ganttChart" style="width:100%">
+  </div>
+  <div class="column">
+<img src="{{url}}" alt="Chart" style="width:100%">
+  </div>
+</div>
+
+    <form action="{{ url_for('timersystem')}}" method="post">
+      <table class="customTable">
+        <thead>
+          <tr>
+            <th colspan="2">CO2 System
+	      <label class="switch">
+		<input type="checkbox"
+		       onclick="handleClick(this,'co2');" {{co2checkboxVal}}>
+		<span class="slider round"></span>
+	      </label>
+	    </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td width="40%"><label for="co2_start">Time to turn on CO2</label></td>
+            <td><input type="time" id="co2_start" name="co2_start" value="{{co2start}}"></td>
+          </tr>
+          <tr>
+            <td><label for="co2_stop">Time to turn off CO2</label></td>
+            <td><input type="time" id="co2_stop" name="co2_stop" value="{{co2stop}}"></td>
+          </tr>
+        </tbody>
+        <thead>
+          <tr>
+            <th colspan="2">RGB Light
+	      <label class="switch">
+		<input type="checkbox"
+		onclick="handleClick(this,'rgb');" {{rgbcheckboxVal}}>
+		<span class="slider round"></span>
+	      </label>	      
+	    </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><label for="rgb_start">Time to turn on RGB</label></td>
+            <td><input type="time" id="rgb_start" name="rgb_start" value="{{rgbstart}}"></td>
+          </tr>
+          <tr>
+            <td><label for="rgb_stop">Time to turn off RGB</label></td>
+            <td><input type="time" id="rgb_stop" name="rgb_stop" value="{{rgbstop}}"></td>
+          </tr>
+        </tbody>
+        <thead>
+          <tr>
+            <th colspan="2">White Light System &nbsp; &nbsp;
+	      <label class="switch">
+		<input type="checkbox" onclick="handleClick(this,'white');" {{whitecheckboxVal}}>
+		<span class="slider round"></span>
+	      </label>
+	    </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><label for="white_start">Time to turn on white light</label></td>
+            <td><input type="time" id="white_start" name="white_start" value="{{whitestart}}"></td>
+          </tr>
+          <tr>
+            <td><label for="white_stop">Time to turn off white light</label></td>
+            <td><input type="time" id="white_stop" name="white_stop" value="{{whitestop}}"></td>
+          </tr>
+          <tr>
+            <td colspan="2">
+              <button class="btn" type="submit">Set</button>
+	    </td>
+          </tr>
+        </tbody>
+      </table>
+      <br />
+    </form>
+    <br />
+   
+    <!--    <img src="{{snapshot}}" alt="snapshot"> -->
+
+  </body>
+</html>

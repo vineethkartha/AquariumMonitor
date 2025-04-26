@@ -1,4 +1,5 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, make_response
+from AuthUtils import auth_required
 import datetime
 import DS18b20_Module
 import DBUtilities as dbutils
@@ -22,6 +23,7 @@ app=Flask(__name__)
 temperatureSensor = DS18b20_Module.DS18b20()
 
 @app.route('/')
+@auth_required
 def index():
     ## Uncomment the below camera section if you plan to use a picamera
     #camera = picamera.PiCamera()
@@ -92,6 +94,7 @@ def index():
     return render_template('index.html', **data)
 
 @app.route('/<deviceName>/<action>')
+@auth_required
 def action(deviceName, action):
     curTime = datetime.datetime.now().time()
     [startTime_str,stopTime_str] = js.getStartAndStopTime(deviceName)
@@ -116,6 +119,7 @@ def action(deviceName, action):
 
     return index()
 @app.route('/timer', methods=["GET","POST"])
+@auth_required
 def timersystem():
     if request.method == "POST":
         startTime = request.form.get("co2_start")
