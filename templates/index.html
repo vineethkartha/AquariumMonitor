@@ -4,104 +4,134 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Aquarium Monitor</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Toggle Device Script -->
   <script>
     function toggleDevice(deviceName) {
       window.location.href = `/${deviceName}/toggle`;
     }
   </script>
-  <script src="https://cdn.tailwindcss.com"></script>
 </head>
+
 <body class="bg-blue-50 font-sans">
-  <div class="max-w-4xl mx-auto p-6">
-    <h1 class="text-3xl font-bold text-center text-white bg-blue-400 py-4 rounded-xl shadow">Aquarium Monitor</h1>
+  <div class="max-w-6xl mx-auto p-6">
+    <h1 class="text-4xl font-bold text-center text-white bg-blue-500 py-6 rounded-2xl shadow mb-8">
+      Aquarium Monitor
+    </h1>
 
-    <div class="grid md:grid-cols-2 gap-6 mt-6">
-      <img src="{{gantturl}}" alt="Gantt Chart" class="rounded-xl shadow" />
-      <img src="{{url}}" alt="Temperature Chart" class="rounded-xl shadow" />
-    </div>
-
-    <form action="{{ url_for('timersystem') }}" method="post">
-      <div class="grid md:grid-cols-2 gap-6 mt-6">
-        <!-- CO2 System -->
-        <div class="bg-white rounded-2xl shadow p-4">
-          <div class="flex justify-between items-center mb-4">
-            <h2 class="text-xl font-semibold">CO₂ System</h2>
-            <label class="relative inline-flex items-center cursor-pointer">
-              <input type="checkbox" class="sr-only peer" onclick="toggleDevice('co2')" {{ 'checked' if co2checkboxVal == 'checked' else '' }}>
-              <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:bg-blue-500 transition-all"></div>
-              <div class="absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform peer-checked:translate-x-5"></div>
-              <span class="ml-14 text-sm text-gray-600">{{ 'On' if co2checkboxVal == 'checked' else 'Off' }}</span>
-            </label>
-          </div>
-          <div class="space-y-2">
-            <label class="block">
-              <span class="text-gray-700">Start Time</span>
-              <input type="time" id="co2_start" name="co2_start" value="{{ co2start }}" class="mt-1 block w-full rounded border-gray-300 shadow-sm" />
-            </label>
-            <label class="block">
-              <span class="text-gray-700">Stop Time</span>
-              <input type="time" id="co2_stop" name="co2_stop" value="{{ co2stop }}" class="mt-1 block w-full rounded border-gray-300 shadow-sm" />
-            </label>
-          </div>
-        </div>
-
-        <!-- RGB Light -->
-        <div class="bg-white rounded-2xl shadow p-4">
-          <div class="flex justify-between items-center mb-4">
-            <h2 class="text-xl font-semibold">RGB Light</h2>
-            <label class="relative inline-flex items-center cursor-pointer">
-              <input type="checkbox" class="sr-only peer" onclick="toggleDevice('rgb')" {{ 'checked' if rgbcheckboxVal == 'checked' else '' }}>
-              <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:bg-purple-500 transition-all"></div>
-              <div class="absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform peer-checked:translate-x-5"></div>
-              <span class="ml-14 text-sm text-gray-600">{{ 'On' if rgbcheckboxVal == 'checked' else 'Off' }}</span>
-            </label>
-          </div>
-          <div class="space-y-2">
-            <label class="block">
-              <span class="text-gray-700">Start Time</span>
-              <input type="time" id="rgb_start" name="rgb_start" value="{{ rgbstart }}" class="mt-1 block w-full rounded border-gray-300 shadow-sm" />
-            </label>
-            <label class="block">
-              <span class="text-gray-700">Stop Time</span>
-              <input type="time" id="rgb_stop" name="rgb_stop" value="{{ rgbstop }}" class="mt-1 block w-full rounded border-gray-300 shadow-sm" />
-            </label>
-          </div>
-        </div>
-
-        <!-- White Light -->
-        <div class="bg-white rounded-2xl shadow p-4">
-          <div class="flex justify-between items-center mb-4">
-            <h2 class="text-xl font-semibold">White Light</h2>
-            <label class="relative inline-flex items-center cursor-pointer">
-              <input type="checkbox" class="sr-only peer" onclick="toggleDevice('white')" {{ 'checked' if whitecheckboxVal == 'checked' else '' }}>
-              <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:bg-gray-600 transition-all"></div>
-              <div class="absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform peer-checked:translate-x-5"></div>
-              <span class="ml-14 text-sm text-gray-600">{{ 'On' if whitecheckboxVal == 'checked' else 'Off' }}</span>
-            </label>
-          </div>
-          <div class="space-y-2">
-            <label class="block">
-              <span class="text-gray-700">Start Time</span>
-              <input type="time" id="white_start" name="white_start" value="{{ whitestart }}" class="mt-1 block w-full rounded border-gray-300 shadow-sm" />
-            </label>
-            <label class="block">
-              <span class="text-gray-700">Stop Time</span>
-              <input type="time" id="white_stop" name="white_stop" value="{{ whitestop }}" class="mt-1 block w-full rounded border-gray-300 shadow-sm" />
-            </label>
-          </div>
-        </div>
-
-        <!-- Temperature Info -->
-        <div class="bg-white rounded-2xl shadow p-4">
-          <h2 class="text-xl font-semibold mb-4">Temperature Info</h2>
-          <p class="text-gray-700">Current: {{currentTemp}}°C</p>
-          <p class="text-gray-700">Max: {{maxTemp}}°C at {{maxTempTime}}</p>
-          <p class="text-gray-700">Min: {{minTemp}}°C at {{minTempTime}}</p>
-          <p class="text-sm text-gray-500 mt-2">Last updated: {{time}}</p>
-        </div>
+    <!-- Info Section -->
+    <section class="mb-12">
+      <h2 class="text-2xl font-semibold text-gray-700 mb-6">Aquarium Information</h2>
+      <div class="grid md:grid-cols-2 gap-6 mb-6">
+        <img src="{{gantturl}}" alt="Gantt Chart" class="rounded-2xl shadow" />
+        <img src="{{url}}" alt="Temperature Chart" class="rounded-2xl shadow" />
       </div>
-      <button type="submit" class="mt-6 w-full bg-green-500 text-white py-3 rounded-xl hover:bg-green-600">Save All Schedules</button>
-    </form>
+      <div class="bg-white rounded-2xl shadow p-6">
+        <h3 class="text-xl font-semibold mb-4">Temperature Info</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-gray-700">
+          <p><strong>Current:</strong> {{currentTemp}}°C</p>
+          <p><strong>Max:</strong> {{maxTemp}}°C at {{maxTempTime}}</p>
+          <p><strong>Min:</strong> {{minTemp}}°C at {{minTempTime}}</p>
+        </div>
+        <p class="text-sm text-gray-500 mt-4">Last updated: {{time}}</p>
+      </div>
+    </section>
+
+    <!-- Device Controls Section -->
+    <section>
+      <h2 class="text-2xl font-semibold text-gray-700 mb-6">Device Controls</h2>
+      <form action="{{ url_for('timersystem') }}" method="post">
+        <div class="grid md:grid-cols-3 gap-6">
+          
+          <!-- CO2 System -->
+          <div class="bg-white rounded-2xl shadow p-6 flex flex-col justify-between">
+            <div>
+              <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-semibold">CO₂ System</h3>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" class="sr-only peer" onclick="toggleDevice('co2')" {{ 'checked' if co2checkboxVal == 'checked' else '' }}>
+                  <div class="w-11 h-6 bg-gray-300 rounded-full peer-checked:bg-blue-500 transition-all relative">
+                    <div class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform peer-checked:translate-x-5"></div>
+                  </div>
+                </label>
+              </div>
+              <div class="space-y-4">
+                <label class="block">
+                  <span class="text-gray-700">Start Time</span>
+                  <input type="time" id="co2_start" name="co2_start" value="{{ co2start }}" class="mt-1 block w-full rounded border-gray-300 shadow-sm" />
+                </label>
+                <label class="block">
+                  <span class="text-gray-700">Stop Time</span>
+                  <input type="time" id="co2_stop" name="co2_stop" value="{{ co2stop }}" class="mt-1 block w-full rounded border-gray-300 shadow-sm" />
+                </label>
+              </div>
+            </div>
+            <span class="mt-4 block text-center text-sm text-gray-500">{{ 'On' if co2checkboxVal == 'checked' else 'Off' }}</span>
+          </div>
+
+          <!-- RGB Light -->
+          <div class="bg-white rounded-2xl shadow p-6 flex flex-col justify-between">
+            <div>
+              <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-semibold">RGB Light</h3>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" class="sr-only peer" onclick="toggleDevice('rgb')" {{ 'checked' if rgbcheckboxVal == 'checked' else '' }}>
+                  <div class="w-11 h-6 bg-gray-300 rounded-full peer-checked:bg-purple-500 transition-all relative">
+                    <div class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform peer-checked:translate-x-5"></div>
+                  </div>
+                </label>
+              </div>
+              <div class="space-y-4">
+                <label class="block">
+                  <span class="text-gray-700">Start Time</span>
+                  <input type="time" id="rgb_start" name="rgb_start" value="{{ rgbstart }}" class="mt-1 block w-full rounded border-gray-300 shadow-sm" />
+                </label>
+                <label class="block">
+                  <span class="text-gray-700">Stop Time</span>
+                  <input type="time" id="rgb_stop" name="rgb_stop" value="{{ rgbstop }}" class="mt-1 block w-full rounded border-gray-300 shadow-sm" />
+                </label>
+              </div>
+            </div>
+            <span class="mt-4 block text-center text-sm text-gray-500">{{ 'On' if rgbcheckboxVal == 'checked' else 'Off' }}</span>
+          </div>
+
+          <!-- White Light -->
+          <div class="bg-white rounded-2xl shadow p-6 flex flex-col justify-between">
+            <div>
+              <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-semibold">White Light</h3>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" class="sr-only peer" onclick="toggleDevice('white')" {{ 'checked' if whitecheckboxVal == 'checked' else '' }}>
+                  <div class="w-11 h-6 bg-gray-300 rounded-full peer-checked:bg-gray-600 transition-all relative">
+                    <div class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform peer-checked:translate-x-5"></div>
+                  </div>
+                </label>
+              </div>
+              <div class="space-y-4">
+                <label class="block">
+                  <span class="text-gray-700">Start Time</span>
+                  <input type="time" id="white_start" name="white_start" value="{{ whitestart }}" class="mt-1 block w-full rounded border-gray-300 shadow-sm" />
+                </label>
+                <label class="block">
+                  <span class="text-gray-700">Stop Time</span>
+                  <input type="time" id="white_stop" name="white_stop" value="{{ whitestop }}" class="mt-1 block w-full rounded border-gray-300 shadow-sm" />
+                </label>
+              </div>
+            </div>
+            <span class="mt-4 block text-center text-sm text-gray-500">{{ 'On' if whitecheckboxVal == 'checked' else 'Off' }}</span>
+          </div>
+
+        </div>
+
+        <button type="submit" class="mt-8 w-full bg-green-500 text-white py-4 rounded-2xl hover:bg-green-600 text-lg">
+          Save All Schedules
+        </button>
+      </form>
+    </section>
+
   </div>
 </body>
 </html>

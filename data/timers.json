@@ -16,7 +16,7 @@
                   "Device": "white",
                   "start": "10:00",
                   "stop": "16:00",
-                  "manual": true
+                  "manual": false
             }
       ]
 }
