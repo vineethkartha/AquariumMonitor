@@ -36,7 +36,8 @@ def getData(mDate):
 		title: {display: true, 
 				text: 'Temperature changes during the day',},
 		legend: {display: false,},
-		scales: {yAxes: [{ticks: {suggestedMin:%s, suggestedMax:%s,},},],},
-		},""" %(str(yaxisMin), str(yaxisMax))
+
+		scales: {yAxes: [{ticks: {suggestedMin: %s, suggestedMax: %s,},},],},
+		},"""  %(str(yaxisMin), str(yaxisMax))
     url = "https://quickchart.io/chart?c={type:\'line\' , data:{labels:%s,datasets:[{label:\'Temperature\', data:%s, %s}]},%s}" %(labels, temp, datasetStyling, options)
     return [curTemp, minTemperature, minTempTime, maxTemperature, maxTempTime, url]
