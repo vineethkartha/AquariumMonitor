@@ -1,9 +1,9 @@
 import time
-import LedModule
+import PinIOModule
 import JSONUtilities as js
 import datetime
 
-valve = LedModule.LedModule(26)
+valve = PinIOModule.PinIOSModule(26)
 try:
     while True:
         [startTime_str,stopTime_str] = js.getStartAndStopTime('co2')

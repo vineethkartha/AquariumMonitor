@@ -1,6 +1,6 @@
 import RPi.GPIO as gpio
 
-class LedModule:
+class PinIOModule:
     anode=0;
     def __init__(self, anode):
         self.anode = anode;
