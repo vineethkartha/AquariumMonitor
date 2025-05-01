@@ -1,10 +1,10 @@
 import time
-import LedModule
+import PinIOModule
 import JSONUtilities as js
 import datetime
 
-sunsunLight= LedModule.LedModule(6)
-rgbLight = LedModule.LedModule(5)
+sunsunLight= PinIOModule.PinIOModule(6)
+rgbLight = PinIOModule.PinIOModule(5)
 
 try:
     while True:
