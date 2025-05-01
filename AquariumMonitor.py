@@ -44,6 +44,10 @@ def index():
     whitemanualOverride = js.getManualOverride('white')
     rgbmanualOverride = js.getManualOverride('rgb')
 
+    co2PinState = GPIO.input(co2system)
+    whiteLightState = GPIO.input(whiteLight)
+    rgbLightState = GPIO.input(rgbLight)
+    
     if co2manualOverride:
         co2checkboxVal = "checked"
     else:
@@ -89,8 +93,12 @@ def index():
         'whitecheckboxVal':whitecheckboxVal,
         'rgbcheckboxVal':rgbcheckboxVal,
         'co2checkboxVal':co2checkboxVal,
+        'co2PinState':co2PinState,
+        'whiteLightState':whiteLightState,
+        'rgbLightState':rgbLightState        
         }
     #print('/static/images/aquarium.jpg?'+str(time.time()))
+    print(rgbLightState)
     return render_template('index.html', **data)
 
 @app.route('/<deviceName>/<action>')

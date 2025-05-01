@@ -51,12 +51,17 @@
               <div>
 		<div class="flex justify-between items-center mb-6">
                   <h3 class="text-xl font-semibold">CO₂ System</h3>
-                  <label class="relative inline-flex items-center cursor-pointer">
-                    <input type="checkbox" class="sr-only peer" onclick="toggleDevice('co2')" {{ 'checked' if co2checkboxVal == 'checked' else '' }}>
-                    <div class="w-11 h-6 bg-gray-300 rounded-full peer-checked:bg-blue-500 transition-all relative">
-                      <div class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform peer-checked:translate-x-5"></div>
-                    </div>
-                  </label>
+		  <label class="relative inline-flex items-center cursor-pointer">
+		    <input type="checkbox" class="sr-only peer" onclick="toggleDevice('rgb')"
+			   {% if co2checkboxVal == 'checked' or co2PinState %}checked{% endif %}>
+  
+		    <!-- Switch Track -->
+		    <div class="w-11 h-6 bg-gray-300 rounded-full transition-all peer-checked:bg-blue-500"></div>
+  
+		    <!-- Switch Thumb -->
+		    <div class="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full transition-transform
+				peer-checked:translate-x-5 pointer-events-none"></div>
+		  </label>		  
 		</div>
 		<div class="space-y-4">
                   <label class="block">
@@ -77,12 +82,17 @@
               <div>
 		<div class="flex justify-between items-center mb-6">
                   <h3 class="text-xl font-semibold">RGB Light</h3>
-                  <label class="relative inline-flex items-center cursor-pointer">
-                    <input type="checkbox" class="sr-only peer" onclick="toggleDevice('rgb')" {{ 'checked' if rgbcheckboxVal == 'checked' else '' }}>
-                    <div class="w-11 h-6 bg-gray-300 rounded-full peer-checked:bg-purple-500 transition-all relative">
-                      <div class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform peer-checked:translate-x-5"></div>
-                    </div>
-                  </label>
+		  <label class="relative inline-flex items-center cursor-pointer">
+		    <input type="checkbox" class="sr-only peer" onclick="toggleDevice('rgb')"
+			   {% if rgbcheckboxVal == 'checked' or rgbLightPinState %}checked{% endif %}>
+  
+		    <!-- Switch Track -->
+		    <div class="w-11 h-6 bg-gray-300 rounded-full transition-all peer-checked:bg-blue-500"></div>
+  
+		    <!-- Switch Thumb -->
+		    <div class="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full transition-transform
+				peer-checked:translate-x-5 pointer-events-none"></div>
+		  </label>		  
 		</div>
 		<div class="space-y-4">
                   <label class="block">
@@ -95,7 +105,7 @@
                   </label>
 		</div>
               </div>
-              <span class="mt-4 block text-center text-sm text-gray-500">{{ 'On' if rgbcheckboxVal == 'checked' else 'Off' }}</span>
+              <span class="mt-4 block text-center text-sm text-gray-500">{{ 'On' if rgbcheckboxVal == 'checked' or rgbLightState else 'Off' }}</span>
             </div>
 
             <!-- White Light -->
@@ -103,12 +113,17 @@
               <div>
 		<div class="flex justify-between items-center mb-6">
                   <h3 class="text-xl font-semibold">White Light</h3>
-                  <label class="relative inline-flex items-center cursor-pointer">
-                    <input type="checkbox" class="sr-only peer" onclick="toggleDevice('white')" {{ 'checked' if whitecheckboxVal == 'checked' else '' }}>
-                    <div class="w-11 h-6 bg-gray-300 rounded-full peer-checked:bg-gray-600 transition-all relative">
-                      <div class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform peer-checked:translate-x-5"></div>
-                    </div>
-                  </label>
+		  <label class="relative inline-flex items-center cursor-pointer">
+		    <input type="checkbox" class="sr-only peer" onclick="toggleDevice('white')"
+			   {% if whitecheckboxVal == 'checked' or whiteLightPinState %}checked{% endif %}>
+  
+		    <!-- Switch Track -->
+		    <div class="w-11 h-6 bg-gray-300 rounded-full transition-all peer-checked:bg-blue-500"></div>
+  
+		    <!-- Switch Thumb -->
+		    <div class="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full transition-transform
+				peer-checked:translate-x-5 pointer-events-none"></div>
+		  </label>		 
 		</div>
 		<div class="space-y-4">
                   <label class="block">
@@ -121,7 +136,7 @@
                   </label>
 		</div>
               </div>
-              <span class="mt-4 block text-center text-sm text-gray-500">{{ 'On' if whitecheckboxVal == 'checked' else 'Off' }}</span>
+              <span class="mt-4 block text-center text-sm text-gray-500">{{ 'On' if whitecheckboxVal == 'checked' or whiteLightState else 'Off' }}</span>
             </div>
 
           </div>

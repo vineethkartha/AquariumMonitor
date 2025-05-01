@@ -1,3 +1,4 @@
+
 import RPi.GPIO as gpio
 
 class PinIOModule:
@@ -18,3 +19,5 @@ class PinIOModule:
     def TurnOff(self):
         gpio.output(self.anode, False)
 
+    def getStatus(self):
+        gpio.input(self.anode)
