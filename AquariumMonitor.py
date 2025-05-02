@@ -97,8 +97,8 @@ def index():
         'whiteLightState':whiteLightState,
         'rgbLightState':rgbLightState        
         }
-    #print('/static/images/aquarium.jpg?'+str(time.time()))
-    print(rgbLightState)
+    print("Co2 state: ")
+    print(co2PinState)
     return render_template('index.html', **data)
 
 @app.route('/<deviceName>/<action>')

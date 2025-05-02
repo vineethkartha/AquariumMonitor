@@ -3,7 +3,7 @@ import PinIOModule
 import JSONUtilities as js
 import datetime
 
-valve = PinIOModule.PinIOSModule(26)
+valve = PinIOModule.PinIOModule(26)
 try:
     while True:
         [startTime_str,stopTime_str] = js.getStartAndStopTime('co2')
