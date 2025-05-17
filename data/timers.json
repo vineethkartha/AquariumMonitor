@@ -8,13 +8,13 @@
             },
             {
                   "Device": "rgb",
-                  "start": "10:00",
+                  "start": "11:00",
                   "stop": "17:00",
                   "manual": false
             },
             {
                   "Device": "white",
-                  "start": "10:00",
+                  "start": "13:00",
                   "stop": "16:00",
                   "manual": false
             }
