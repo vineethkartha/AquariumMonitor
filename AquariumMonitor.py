@@ -1,10 +1,10 @@
-from flask import Flask, render_template, request, make_response
+from flask import Flask, render_template, request, make_response, jsonify
 from AuthUtils import auth_required
 import datetime
 import DS18b20_Module
 import DBUtilities as dbutils
 import JSONUtilities as js
-import picamera
+#import picamera
 import time
 import RPi.GPIO as GPIO
 
@@ -20,7 +20,8 @@ GPIO.setup(co2system, GPIO.OUT)
 
 app=Flask(__name__)
 
-temperatureSensor = DS18b20_Module.DS18b20()
+# Uncomment this if you have a temperature sensor 
+#temperatureSensor = DS18b20_Module.DS18b20()
 
 @app.route('/')
 @auth_required
@@ -101,7 +102,7 @@ def index():
     print(co2PinState)
     return render_template('index.html', **data)
 
-@app.route('/<deviceName>/<action>')
+@app.route('/<deviceName>/<action>', methods=['POST'])
 @auth_required
 def action(deviceName, action):
     curTime = datetime.datetime.now().time()
@@ -114,18 +115,25 @@ def action(deviceName, action):
         device = rgbLight
     elif deviceName == 'co2':
         device = co2system
-        
+    else:
+        return jsonify({'error: unknown device'}),400
+
+    status = 'unchanged';
+    
     if(curTime < startTime or curTime > stopTime):
         if action =="toggle":
             manual = js.getManualOverride(deviceName)
             if manual:
                 js.updateManualOverride(deviceName, False)
                 GPIO.output(device, GPIO.LOW)
+                status = 'off'
             else:
                 js.updateManualOverride(deviceName, True)
                 GPIO.output(device, GPIO.HIGH)
+                status = 'on'
 
-    return index()
+    return jsonify({'status': status})
+
 @app.route('/timer', methods=["GET","POST"])
 @auth_required
 def timersystem():
