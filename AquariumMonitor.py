@@ -21,7 +21,7 @@ GPIO.setup(co2system, GPIO.OUT)
 app=Flask(__name__)
 
 # Uncomment this if you have a temperature sensor 
-#temperatureSensor = DS18b20_Module.DS18b20()
+temperatureSensor = DS18b20_Module.DS18b20()
 
 @app.route('/')
 @auth_required
