@@ -157,6 +157,10 @@ def timersystem():
 
 @app.route('/temperature_chart')
 def temperature_chart():
+    return render_template("temperature_chart.html")
+
+@app.route('/temperature_chart_data')
+def temperature_chart_data():
     dbName = '/home/vineeth/AquariumMonitor/data/temperatureLog.db'
     ist = pytz.timezone('Asia/Kolkata')
     today = datetime.now(ist).date()
@@ -165,17 +169,11 @@ def temperature_chart():
     start_date_str = request.args.get('start_date')
     end_date_str = request.args.get('end_date')
 
-    print(start_date_str)
-    print(end_date_str)
-    # Default to today if not specified
     try:
         start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date() if start_date_str else today
         end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date() if end_date_str else start_date
     except ValueError:
-        start_date = end_date = today
-
-    print(start_date_str)
-    print(end_date_str)
+        return jsonify({'error': 'Invalid date format'}), 400
 
     conn = sqlite3.connect(dbName)
     cursor = conn.cursor()
@@ -186,6 +184,8 @@ def temperature_chart():
     """, (start_date.strftime('%D'), end_date.strftime('%D')))
     rows = cursor.fetchall()
     conn.close()
+
+    print(start_date.strftime('%D'))
     chart_data = [
         {
             'timestamp': f"{date} {time}",
@@ -193,11 +193,7 @@ def temperature_chart():
         } for date, time, temp in rows
     ]
 
-    return render_template("temperature_chart.html",
-                           chart_data=chart_data,
-                           start_date=start_date.strftime('%Y-%m-%d'),
-                           end_date=end_date.strftime('%Y-%m-%d'))
-
+    return jsonify(chart_data)
 
 if __name__=='__main__':
     app.run(debug=True, host='0.0.0.0')

@@ -1,215 +1,202 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Temperature Chart</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
+    <meta charset="UTF-8">
+    <title>Temperature Chart</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-<body class="bg-gray-100 min-h-screen flex flex-col items-center p-4">
+<body>
+    <h2>Temperature Readings</h2>
 
-  <h1 class="text-2xl font-semibold mb-6">Temperature Chart</h1>
-
-  <!-- Date Range Form -->
-  <form method="get" action="/temperature_chart" class="w-full max-w-xl bg-white rounded shadow p-6 space-y-4">
-    <div class="space-y-2">
-      <label for="quickRange" class="block text-sm font-medium">Select Range</label>
-      <select id="quickRange" name="quick_range" class="w-full border border-gray-300 rounded-md p-2" onchange="handleQuickRangeChange(this)">
-        <option value="today" selected>Today</option>
-        <option value="yesterday">Yesterday</option>
-        <option value="last_3_days">Last 3 Days</option>
-        <option value="last_7_days">Last 7 Days</option>
-	<option value="last_6_months">Last 6 Months</option>
-	<option value="last_1_year">Last 1 Year</option>
-	<option value="year_to_date">Year to date</option>
-        <option value="custom">Custom Range</option>
-      </select>
-    </div>
-
-    <div id="customRange" class="grid grid-cols-2 gap-4 hidden">
-      <div>
-        <label for="startDate" class="block text-sm font-medium mb-2">Start Date</label>
-        <input id="startDate" name="start_date" type="date" value="{{ start_date }}" class="w-full border border-gray-300 rounded-md p-2" />
-      </div>
-      <div>
-        <label for="endDate" class="block text-sm font-medium mb-2">End Date</label>
-        <input id="endDate" name="end_date" type="date" value="{{ end_date }}" class="w-full border border-gray-300 rounded-md p-2" />
-      </div>
-    </div>
-
-    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded">Show</button>
-  </form>
-
-  <!-- Chart Container -->
-  <div class="w-full max-w-xl mt-8 bg-white rounded shadow p-4">
-    <canvas id="temperatureChart" class="w-full h-64"></canvas>
-  </div>
-
-  <!-- CSV Download -->
-  <div class="w-full max-w-xl mt-4 flex justify-end">
-    <button type="button" onclick="downloadCSV()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Download CSV</button>
-  </div>
-
-  <script>
-    const chartData = {{ chart_data | tojson }};
-    const labels = chartData.map(entry => entry.timestamp.split(' ')[1]);
-    const temps = chartData.map(entry => entry.temperature);
-    const minTemp = Math.min(...temps);
-    const maxTemp = Math.max(...temps);
-    const avgTemp = temps.reduce((a, b) => a + b, 0) / temps.length;
-    const minIndex = temps.indexOf(minTemp);
-    const maxIndex = temps.indexOf(maxTemp);
-
-    Chart.register(ChartZoom);
-    const ctx = document.getElementById('temperatureChart').getContext('2d');    
-    const temperatureChart = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: labels,
-        datasets: [
-          {
-            label: 'Temperature (°C)',
-            data: temps,
-            borderColor: 'rgb(59 130 246)',
-            borderWidth: 2,
-            tension: 0.3,
-            fill: false,
-            pointRadius: temps.map((_, i) => (i === minIndex || i === maxIndex) ? 6 : 3),
-            pointBackgroundColor: temps.map((_, i) => {
-              if (i === minIndex) return 'rgb(220 38 38)';
-              if (i === maxIndex) return 'rgb(16 185 129)';
-              return 'rgb(59 130 246)';
-            }),
-          },
-          {
-            label: 'Average Temperature',
-            data: Array(temps.length).fill(avgTemp),
-            borderColor: 'rgba(156, 163, 175, 0.7)',
-            borderDash: [5, 5],
-            borderWidth: 1,
-            pointRadius: 0,
-            fill: false,
-            tension: 0
-          }
-        ]
-      },
-      options: {
-        responsive: true,
-        scales: {
-          y: {
-            suggestedMin: minTemp - 1,
-            suggestedMax: maxTemp + 1,
-            title: {
-              display: true,
-              text: 'Temperature (°C)'
-            }
-          },
-          x: {
-            title: {
-              display: true,
-              text: 'Time'
-            }
-          }
-        },
-        plugins: {
-          legend: { position: 'top' },
-          tooltip: {
-            callbacks: {
-              label: context => `${context.parsed.y.toFixed(2)} °C`
-            }
-          }
-        }
+    <label for="quickRange">Quick Range: </label>
+    <select id="quickRange">
+        <option value="">--Select--</option>
+        <option value="today">Today</option>
+        <option value="1week">Last 1 Week</option>
+        <option value="1month">Last 1 Month</option>
+        <option value="6months">Last 6 Months</option>
+        <option value="1year">Last 1 Year</option>
+        <option value="ytd">Year to Date</option>
+    </select>
+    <style>
+      /* Spinner animation */
+      @keyframes spin {
+	  0% { transform: rotate(0deg); }
+	  100% { transform: rotate(360deg); }
       }
-    });
+      
+      /* Container for chart & spinner */
+      #chartContainer {
+	  position: relative;
+	  width: 900px;  /* match your canvas width */
+	  height: 400px; /* match your canvas height */
+      }
+      
+      /* Overlay spinner */
+      #loadingSpinnerOverlay {
+	  display: none;
+	  position: absolute;
+	  top: 0; left: 0;
+	  width: 100%; height: 100%;
+	  background: rgba(255, 255, 255, 0.7); /* semi-transparent white */
+	  z-index: 10;
+	  display: flex;
+	  justify-content: center;
+	  align-items: center;
+      }
+      
+      #loadingSpinnerOverlay div.spinner {
+	  border: 6px solid #f3f3f3;
+	  border-top: 6px solid #3498db;
+	  border-radius: 50%;
+	  width: 36px;
+	  height: 36px;
+	  animation: spin 1s linear infinite;
+      }
+    </style>
+    
+    <div id="chartContainer">
+      <canvas id="temperatureChart" width="900" height="400"></canvas>
+      <div id="loadingSpinnerOverlay">
+	<div class="spinner"></div>
+      </div>
+    </div>
+    
+    <script>
+        const ctx = document.getElementById('temperatureChart').getContext('2d');
+        let temperatureChart;
 
-    function handleQuickRangeChange(select) {
-      const customRange = document.getElementById('customRange');
-      if (select.value === 'custom') {
-        customRange.classList.remove('hidden');
-      } else {
-        const today = new Date();
-        const startDateInput = document.getElementById('startDate');
-        const endDateInput = document.getElementById('endDate');
-
-        let startDate, endDate;
-
-        switch (select.value) {
-          case 'today':
-            startDate = endDate = today;
-            break;
-          case 'yesterday':
-            startDate = endDate = new Date(today.setDate(today.getDate() - 1));
-            break;
-          case 'last_3_days':
-            endDate = today;
-            startDate = new Date();
-            startDate.setDate(endDate.getDate() - 2);
-            break;
-          case 'last_7_days':
-            endDate = today;
-            startDate = new Date();
-            startDate.setDate(endDate.getDate() - 6);
-            break;
-	case 'last_6_months':
-            endDate = today;
-            startDate = new Date();
-            startDate.setMonth(startDate.getMonth() - 6);
-            break;
-
-	case 'last_1_year':
-            endDate = today;
-            startDate = new Date();
-            startDate.setFullYear(startDate.getFullYear() - 1);
-            break;
-
-	case 'year_to_date':
-	    endDate = today;
-	    startDate = new Date(endDate.getFullYear(), 0, 1); // Jan 1st of current year
-	    break;
+        function formatDate(date) {
+            const month = (date.getMonth() + 1).toString().padStart(2, '0');
+            const day = date.getDate().toString().padStart(2, '0');
+            return `${date.getFullYear()}-${month}-${day}`;
         }
 
-	  function toLocalDateInputValue(date) {
-	      const offset = date.getTimezoneOffset();
-	      const localDate = new Date(date.getTime() - (offset * 60 * 1000));
-	      return localDate.toISOString().split('T')[0];
-	  }
-          if (startDate && endDate) {
-	      startDateInput.value = toLocalDateInputValue(startDate);
-	      endDateInput.value = toLocalDateInputValue(endDate);
+      function loadChartData(startDate, endDate) {
+	  const spinnerOverlay = document.getElementById('loadingSpinnerOverlay');
+	  spinnerOverlay.style.display = 'flex'; // Show overlay spinner
+
+          fetch(`/temperature_chart_data?start_date=${startDate}&end_date=${endDate}`)
+              .then(response => response.json())
+              .then(data => {
+		  spinnerOverlay.style.display = 'none'; // Hide overlay spinner
+                  if (!Array.isArray(data) || data.length === 0) {
+                      alert("No data available for this range.");
+                      return;
+                  }
+		  
+                  const labels = data.map(entry => entry.timestamp);
+                  const temperatures = data.map(entry => entry.temperature);
+		  
+                  const minTemp = Math.min(...temperatures);
+                  const maxTemp = Math.max(...temperatures);
+                  const avgTemp = temperatures.reduce((a, b) => a + b, 0) / temperatures.length;
+		  
+                  const pointColors = temperatures.map(temp =>
+						       temp === minTemp ? 'blue' :
+						       temp === maxTemp ? 'red' :
+						       'rgba(75, 192, 192, 1)'
+						      );
+		  
+                  const pointSizes = temperatures.map(temp =>
+						      (temp === minTemp || temp === maxTemp) ? 6 : 2
+						     );
+		  
+                  const chartData = {
+                      labels: labels,
+                      datasets: [
+                          {
+                              label: 'Temperature (°C)',
+                              data: temperatures,
+                              borderColor: 'rgba(75, 192, 192, 1)',
+                              pointBackgroundColor: pointColors,
+                              pointRadius: pointSizes,
+                              fill: false,
+                              tension: 0.5
+                          },
+                          {
+                              label: `Average (${avgTemp.toFixed(1)}°C)`,
+                              data: Array(temperatures.length).fill(avgTemp),
+                              borderColor: 'rgba(255, 205, 86, 0.8)',
+                              borderDash: [6, 6],
+                              pointRadius: 0,
+                              fill: false
+                          }
+                      ]
+                  };
+		  
+                  const chartOptions = {
+                      responsive: true,
+                      scales: {
+                          x: {
+                              title: { display: true, text: 'Date & Time' },
+                              ticks: { maxRotation: 60, minRotation: 45 }
+                          },
+                          y: {
+                              title: { display: true, text: 'Temperature (°C)' },
+                              min: Math.floor(minTemp * 10) / 10 - 0.2,
+                              max: Math.ceil(maxTemp * 10) / 10 + 0.2,
+                              ticks: { stepSize: 0.1 }
+                          }
+                      }
+                  };
+		  
+                  if (temperatureChart) {
+                      temperatureChart.destroy();
+                  }
+		  
+                  temperatureChart = new Chart(ctx, {
+                      type: 'line',
+                      data: chartData,
+                      options: chartOptions
+                  });
+              })
+	      .catch(error => {
+		  spinnerOverlay.style.display = 'none'; // Hide overlay spinner
+		  console.error('Fetch error:', error);
+		  alert("Failed to load data.");
+              });
+      }
+      
+      document.getElementById('quickRange').addEventListener('change', function () {
+          const today = new Date();
+          let startDate, endDate = today;
+	  
+          switch (this.value) {
+          case 'today':
+              startDate = today;
+              break;
+          case '1week':
+              startDate = new Date(today);
+              startDate.setDate(today.getDate() - 7);
+                    break;
+          case '1month':
+              startDate = new Date(today);
+              startDate.setMonth(today.getMonth() - 1);
+              break;
+          case '6months':
+              startDate = new Date(today);
+              startDate.setMonth(today.getMonth() - 6);
+              break;
+                case '1year':
+                    startDate = new Date(today);
+              startDate.setFullYear(today.getFullYear() - 1);
+              break;
+          case 'ytd':
+              startDate = new Date(today.getFullYear(), 0, 1);
+              break;
+          default:
+              return;
           }
 	  
-          customRange.classList.add('hidden');
-      }
-    }
-    
-    function downloadCSV() {
-      let csv = 'Time,Temperature\n';
-      chartData.forEach(row => {
-        const time = row.timestamp.split(' ')[1];
-        csv += `${time},${row.temperature}\n`;
+          loadChartData(formatDate(startDate), formatDate(endDate));
       });
-      const blob = new Blob([csv], { type: 'text/csv' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'temperature_data.csv';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    }
-
-    // Show custom range on load if applicable
-    window.addEventListener('DOMContentLoaded', () => {
-      const start = document.getElementById('startDate').value;
-      const end = document.getElementById('endDate').value;
-      if (start && end) {
-        document.getElementById('quickRange').value = 'custom';
-        document.getElementById('customRange').classList.remove('hidden');
-      }
-    });
-  </script>
+      
+      // Optional: auto-load "Last 1 Week" on first page load
+      window.addEventListener('DOMContentLoaded', () => {
+          document.getElementById('quickRange').value = '1week';
+          document.getElementById('quickRange').dispatchEvent(new Event('change'));
+      });
+    </script>
 </body>
 </html>
