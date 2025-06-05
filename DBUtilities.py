@@ -41,3 +41,4 @@ def getData(mDate):
 		},"""  %(str(yaxisMin), str(yaxisMax))
     url = "https://quickchart.io/chart?c={type:\'line\' , data:{labels:%s,datasets:[{label:\'Temperature\', data:%s, %s}]},%s}" %(labels, temp, datasetStyling, options)
     return [curTemp, minTemperature, minTempTime, maxTemperature, maxTempTime, url]
+

@@ -1,12 +1,14 @@
 from flask import Flask, render_template, request, make_response, jsonify
 from AuthUtils import auth_required
-import datetime
 import DS18b20_Module
 import DBUtilities as dbutils
 import JSONUtilities as js
 #import picamera
 import time
 import RPi.GPIO as GPIO
+from datetime import datetime
+import pytz
+import sqlite3
 
 GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
@@ -37,7 +39,7 @@ def index():
     [co2start,co2stop] = js.getStartAndStopTime('co2')
     [rgbstart,rgbstop] =js.getStartAndStopTime('rgb')
     [whitestart,whitestop] = js.getStartAndStopTime('white')
-    curTime = datetime.datetime.now()
+    curTime = datetime.now()
     curTimeStr = curTime.strftime("%D  %H:%M")
     curDate = curTime.strftime("%D")
     
@@ -99,16 +101,16 @@ def index():
         'rgbLightState':rgbLightState        
         }
     print("Co2 state: ")
-    print(co2PinState)
+    print(curTemp)
     return render_template('index.html', **data)
 
 @app.route('/<deviceName>/<action>', methods=['POST'])
 @auth_required
 def action(deviceName, action):
-    curTime = datetime.datetime.now().time()
+    curTime = datetime.now().time()
     [startTime_str,stopTime_str] = js.getStartAndStopTime(deviceName)
-    startTime = datetime.datetime.strptime(startTime_str,"%H:%M").time()
-    stopTime = datetime.datetime.strptime(stopTime_str,"%H:%M").time()
+    startTime = datetime.strptime(startTime_str,"%H:%M").time()
+    stopTime = datetime.strptime(stopTime_str,"%H:%M").time()
     if deviceName == 'white':
         device = whiteLight
     elif deviceName == 'rgb':
@@ -151,6 +153,45 @@ def timersystem():
         js.updateTimers('white', startTime, stopTime)
 
         return render_template("timerset.html")
+
+@app.route('/temperature_chart')
+def temperature_chart():
+    dbName = '/home/vineeth/AquariumMonitor/data/temperatureLog.db'
+    # Use local time (IST)
+    ist = pytz.timezone('Asia/Kolkata')
+    today = datetime.now(ist).date()
+    
+    # Get date from query parameter (fallback to today)
+    date_str = request.args.get('date')
+    try:
+        selected_date = datetime.strptime(date_str, '%Y-%m-%d').date() if date_str else today
+    except ValueError:
+        selected_date = today  # fallback if invalid
+
+    selected_date_str = selected_date.strftime('%D')
+    print(selected_date_str)
+    # Query DB for that date
+    conn = sqlite3.connect(dbName)
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT Date, Time, Temperature FROM AquariumTemperature
+        WHERE Date = ?
+        ORDER BY Time ASC
+    """, (selected_date_str,))
+    rows = cursor.fetchall()
+    conn.close()
+    print(rows)
+    chart_data = [
+        {
+            'timestamp': f"{time}",
+            'temperature': temp
+        } for date, time, temp in rows
+    ]
+
+    return render_template("temperature_chart.html",
+                           chart_data=chart_data,
+                           selected_date=selected_date_str)
+
 
 if __name__=='__main__':
     app.run(debug=True, host='0.0.0.0')
