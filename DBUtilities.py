@@ -2,13 +2,13 @@ import sqlite3
 
 dbName = '/home/vineeth/AquariumMonitor/data/temperatureLog.db'
 
-def getData(mDate):
+def getMaxMinAndCurrentTempData(mDate):
     connection = sqlite3.connect(dbName)
     cursor= connection.cursor()
-
-    queryResult= cursor.execute("select Time, Temperature from AquariumTemperature where Date= :date",{"date":mDate})
+    queryResult= cursor.execute("select Time, Temperature from AquariumTemperature ORDER BY id DESC LIMIT 1")
     data = queryResult.fetchall()
     curTemp = data[len(data)-1][1]
+
     minQuery = cursor.execute("select Time,min(Temperature) from AquariumTemperature where Date= :date",{"date":mDate})
     minData= minQuery.fetchall()
     minTemperature = minData[len(minData)-1][1]
@@ -18,27 +18,27 @@ def getData(mDate):
     maxData= maxQuery.fetchall()
     maxTemperature = maxData[len(maxData)-1][1]
     maxTempTime = maxData[len(maxData)-1][0]
+    
+    return [curTemp, minTemperature, minTempTime, maxTemperature, maxTempTime]
 
-    yaxisMin = round(minTemperature - 1)
-    yaxisMax = round(maxTemperature - 1)
-    labels=[]
-    temp=[]
-    for row in data:
-        labels.append(row[0])
-        temp.append(row[1])
-    datasetStyling = """pointRadius: 1,
-			fill: false,
-			borderColor: 'red',
-			borderWidth: 1,
-			lineTension: 0.8,"""
+def getDataForChart(start_date, end_date):
+    conn = sqlite3.connect(dbName)
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT Date, Time, Temperature FROM AquariumTemperature
+        WHERE Date BETWEEN ? AND ?
+        ORDER BY Date ASC, Time ASC
+    """, (start_date.strftime('%D'), end_date.strftime('%D')))
+    rows = cursor.fetchall()
+    conn.close()
 
-    options = """options: {
-		title: {display: true, 
-				text: 'Temperature changes during the day',},
-		legend: {display: false,},
+    print(start_date.strftime('%D'))
+    chart_data = [
+        {
+            'timestamp': f"{date} {time}",
+            'temperature': round(temp, 1)
+        } for date, time, temp in rows
+    ]
 
-		scales: {yAxes: [{ticks: {suggestedMin: %s, suggestedMax: %s,},},],},
-		},"""  %(str(yaxisMin), str(yaxisMax))
-    url = "https://quickchart.io/chart?c={type:\'line\' , data:{labels:%s,datasets:[{label:\'Temperature\', data:%s, %s}]},%s}" %(labels, temp, datasetStyling, options)
-    return [curTemp, minTemperature, minTempTime, maxTemperature, maxTempTime, url]
+    return chart_data
 

@@ -46,7 +46,15 @@
 	<!-- Charts -->
 	<div class="grid md:grid-cols-2 gap-6 mb-6">
           <img src="{{gantturl}}" alt="Gantt Chart" class="rounded-2xl shadow" />
-          <img src="{{url}}" alt="Temperature Chart" class="rounded-2xl shadow" />
+	  <h3>Temperature Overview</h3>
+	  <div style="width: 400px; height: 200px; border: 1px solid #ccc; border-radius: 8px; overflow: hidden; cursor: pointer;" onclick="location.href='/temperature_chart';">
+	    <iframe 
+              src="/temperature_chart?embed=true" 
+              width="400" 
+              height="200" 
+              style="border: none; pointer-events: none;">
+	    </iframe>
+	  </div>
 	</div>
 	<!-- Text Info -->
 	<div class="bg-white rounded-2xl shadow p-6">

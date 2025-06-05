@@ -105,5 +105,5 @@ def getGanttChartURL():
     }, ],
   },%s
 }"""%(curDate+" "+ co2start,curDate+" "+ co2stop, curDate+" "+ rgbstart, curDate+" "+ rgbstop, curDate+" "+ whitestart, curDate+" "+ whitestop, gantCharOptions)
-    print(gantChartURL)
+    #print(gantChartURL)
     return gantChartURL

@@ -3,12 +3,10 @@ from AuthUtils import auth_required
 import DS18b20_Module
 import DBUtilities as dbutils
 import JSONUtilities as js
-#import picamera
 import time
 import RPi.GPIO as GPIO
 from datetime import datetime
 import pytz
-import sqlite3
 
 GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
@@ -28,13 +26,6 @@ temperatureSensor = DS18b20_Module.DS18b20()
 @app.route('/')
 @auth_required
 def index():
-    ## Uncomment the below camera section if you plan to use a picamera
-    #camera = picamera.PiCamera()
-    #time.sleep(.5)
-    #camera.resolution = (800, 600)
-    #camera.vflip = True
-    #camera.capture('/home/vineeth/AquariumMonitor/static/images/aquarium.jpg')
-    #camera.close()
 
     [co2start,co2stop] = js.getStartAndStopTime('co2')
     [rgbstart,rgbstop] =js.getStartAndStopTime('rgb')
@@ -67,19 +58,19 @@ def index():
         rgbcheckboxVal = ""
 
     gantChartURL = js.getGanttChartURL()
+    
     try:
-        curTemp,minTemp, minTempTime, maxTemp, maxTempTime,url =dbutils.getData(curDate)
+        curTemp,minTemp, minTempTime, maxTemp, maxTempTime =dbutils.getMaxMinAndCurrentTempData(curDate)
     except:
         curTemp="NaN"
         minTemp="NaN"
         minTempTime="NaN"
         maxTemp="NaN"
         maxTempTime="NaN"
-        url = "/static/images/error.png"
+        
     data = {
         'title': 'My Aquarium Page',
         'time': curTimeStr,
-        'url': url,
         'gantturl': gantChartURL,
         'minTemp': minTemp,
         'minTempTime': minTempTime,
@@ -88,20 +79,17 @@ def index():
         'currentTemp': curTemp,
         'co2start':co2start,
         'co2stop':co2stop,
-        'rgbstart':rgbstart,
-        'rgbstop':rgbstop,
-        'whitestart':whitestart,
-        'whitestop':whitestop,
-        #'snapshot':'/static/images/aquarium.jpg?'+str(time.time()), #uncomment this if using a camera
-        'whitecheckboxVal':whitecheckboxVal,
-        'rgbcheckboxVal':rgbcheckboxVal,
         'co2checkboxVal':co2checkboxVal,
         'co2PinState':co2PinState,
-        'whiteLightState':whiteLightState,
-        'rgbLightState':rgbLightState        
+        'rgbstart':rgbstart,
+        'rgbstop':rgbstop,
+        'rgbcheckboxVal':rgbcheckboxVal,
+        'rgbLightState':rgbLightState,        
+        'whitestart':whitestart,
+        'whitestop':whitestop,
+        'whitecheckboxVal':whitecheckboxVal,
+        'whiteLightState':whiteLightState
         }
-    print("Co2 state: ")
-    print(curTemp)
     return render_template('index.html', **data)
 
 @app.route('/<deviceName>/<action>', methods=['POST'])
@@ -157,11 +145,11 @@ def timersystem():
 
 @app.route('/temperature_chart')
 def temperature_chart():
+    embed = request.args.get('embed') == 'true'
     return render_template("temperature_chart.html")
 
 @app.route('/temperature_chart_data')
 def temperature_chart_data():
-    dbName = '/home/vineeth/AquariumMonitor/data/temperatureLog.db'
     ist = pytz.timezone('Asia/Kolkata')
     today = datetime.now(ist).date()
 
@@ -175,24 +163,7 @@ def temperature_chart_data():
     except ValueError:
         return jsonify({'error': 'Invalid date format'}), 400
 
-    conn = sqlite3.connect(dbName)
-    cursor = conn.cursor()
-    cursor.execute("""
-        SELECT Date, Time, Temperature FROM AquariumTemperature
-        WHERE Date BETWEEN ? AND ?
-        ORDER BY Date ASC, Time ASC
-    """, (start_date.strftime('%D'), end_date.strftime('%D')))
-    rows = cursor.fetchall()
-    conn.close()
-
-    print(start_date.strftime('%D'))
-    chart_data = [
-        {
-            'timestamp': f"{date} {time}",
-            'temperature': round(temp, 1)
-        } for date, time, temp in rows
-    ]
-
+    chart_data = dbutils.getDataForChart(start_date, end_date)
     return jsonify(chart_data)
 
 if __name__=='__main__':
