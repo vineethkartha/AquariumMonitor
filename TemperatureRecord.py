@@ -17,7 +17,12 @@ def enterRecord():
     connection.commit()
     
 def getTemperatureRecord():
-    temperature = temperatureSensor.readTemperature()
+    #compute average of 10 readings to avoid sporadic values
+    temperature = 0;
+    NUM_READINGS = 10;
+    for iteration in range(NUM_READINGS):
+        temperature = temperature + temperatureSensor.readTemperature()
+    temperature = temperature/NUM_READINGS;      
     time = datetime.now().strftime("%H:%M")
     date = datetime.now().strftime("%D")
     print(date,time,temperature)

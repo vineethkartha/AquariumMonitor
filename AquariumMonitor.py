@@ -154,43 +154,49 @@ def timersystem():
 
         return render_template("timerset.html")
 
+
 @app.route('/temperature_chart')
 def temperature_chart():
     dbName = '/home/vineeth/AquariumMonitor/data/temperatureLog.db'
-    # Use local time (IST)
     ist = pytz.timezone('Asia/Kolkata')
     today = datetime.now(ist).date()
-    
-    # Get date from query parameter (fallback to today)
-    date_str = request.args.get('date')
-    try:
-        selected_date = datetime.strptime(date_str, '%Y-%m-%d').date() if date_str else today
-    except ValueError:
-        selected_date = today  # fallback if invalid
 
-    selected_date_str = selected_date.strftime('%D')
-    print(selected_date_str)
-    # Query DB for that date
+    # Get query parameters
+    start_date_str = request.args.get('start_date')
+    end_date_str = request.args.get('end_date')
+
+    print(start_date_str)
+    print(end_date_str)
+    # Default to today if not specified
+    try:
+        start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date() if start_date_str else today
+        end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date() if end_date_str else start_date
+    except ValueError:
+        start_date = end_date = today
+
+    print(start_date_str)
+    print(end_date_str)
+
     conn = sqlite3.connect(dbName)
     cursor = conn.cursor()
     cursor.execute("""
         SELECT Date, Time, Temperature FROM AquariumTemperature
-        WHERE Date = ?
-        ORDER BY Time ASC
-    """, (selected_date_str,))
+        WHERE Date BETWEEN ? AND ?
+        ORDER BY Date ASC, Time ASC
+    """, (start_date.strftime('%D'), end_date.strftime('%D')))
     rows = cursor.fetchall()
     conn.close()
-    print(rows)
     chart_data = [
         {
-            'timestamp': f"{time}",
-            'temperature': temp
+            'timestamp': f"{date} {time}",
+            'temperature': round(temp, 1)
         } for date, time, temp in rows
     ]
 
     return render_template("temperature_chart.html",
                            chart_data=chart_data,
-                           selected_date=selected_date_str)
+                           start_date=start_date.strftime('%Y-%m-%d'),
+                           end_date=end_date.strftime('%Y-%m-%d'))
 
 
 if __name__=='__main__':
