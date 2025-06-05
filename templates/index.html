@@ -44,17 +44,28 @@
           <img src="http://192.168.0.120:8081/" alt="Live Stream" class="w-full h-auto" />
         </div>
 	<!-- Charts -->
+	<!-- CLOCK DIAL + TEMPERATURE OVERVIEW -->
 	<div class="grid md:grid-cols-2 gap-6 mb-6">
-          <img src="{{gantturl}}" alt="Gantt Chart" class="rounded-2xl shadow" />
-	  <h3>Temperature Overview</h3>
-	  <div style="width: 400px; height: 200px; border: 1px solid #ccc; border-radius: 8px; overflow: hidden; cursor: pointer;" onclick="location.href='/temperature_chart';">
-	    <iframe 
-              src="/temperature_chart?embed=true" 
-              width="400" 
-              height="200" 
-              style="border: none; pointer-events: none;">
-	    </iframe>
+	  
+	  <!-- Clock Dial Chart -->
+	  <div class="bg-white rounded-2xl shadow p-4 flex flex-col items-center justify-center">
+	    <h3 class="text-lg font-semibold mb-2 text-gray-700">Light Timer Clock</h3>
+	    <svg id="clockDial" width="400" height="450"></svg>
 	  </div>
+	  
+	  <!-- Temperature Overview -->
+	  <div class="bg-white rounded-2xl shadow p-4 flex flex-col items-center justify-center">
+	    <h3 class="text-lg font-semibold mb-2 text-gray-700">Temperature Overview</h3>
+	    <div style="width: 400px; height: 450px; border-radius: 8px; overflow: hidden; cursor: pointer;" onclick="location.href='/temperature_chart';">
+	      <iframe
+		src="/temperature_chart?embed=true"
+		width="400"
+		height="450"
+		style="border: none; pointer-events: none;">
+	      </iframe>
+	    </div>
+	  </div>
+	  
 	</div>
 	<!-- Text Info -->
 	<div class="bg-white rounded-2xl shadow p-6">
@@ -189,5 +200,108 @@
           }
       }
     </script>
+    <!-- D3 Clock Dial Script -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script>
+      const svg = d3.select("#clockDial");
+      const width = +svg.attr("width");
+      const height = +svg.attr("height");
+      const radius = Math.min(width, height) / 2 - 20;
+      const center = { x: width / 2, y: height / 2 };
+      
+      // Convert "HH:MM" to float hour
+      function timeToHour(str) {
+	  const [h, m] = str.split(":").map(Number);
+	  return ((h + m / 60));
+      }
+      
+      // Light periods from Jinja variables
+      const lights = [
+	  {
+	      start: timeToHour("{{ co2start }}"),
+	      end: timeToHour("{{ co2stop }}"),
+	      color: "orange",
+	      label: "CO₂"
+	  }
+	  ,
+	  {
+	      start: timeToHour("{{ rgbstart }}"),
+	      end: timeToHour("{{ rgbstop }}"),
+	      color: "steelblue",
+	      label: "RGB"
+	  },
+	  {
+	      start: timeToHour("{{ whitestart }}"),
+	      end: timeToHour("{{ whitestop }}"),
+	      color: "goldenrod",
+	      label: "White"
+	  }
+      ];
+      
+      // Normalize duration
+      lights.forEach(l => {
+	  if (l.end < l.start) l.end += 24; // handle overnight timers
+      });
+      
+      // Convert hour to radians
+      function hourToAngle(hour) {
+	  return (hour / 12) *2* Math.PI;// - Math.PI / 2;
+      }
+      
+      // Draw arcs
+      lights.forEach((light, i) => {
+	  const startAngle = hourToAngle(light.start);
+	  const endAngle = hourToAngle(light.end);
+	  console.log(startAngle, endAngle)
+	  const arc = d3.arc()
+		.innerRadius(radius - (i + 1) * 20)
+		.outerRadius(radius - i * 20)
+		.startAngle(startAngle)
+		.endAngle(endAngle);
+	  
+	  svg.append("path")
+	      .attr("transform", `translate(${center.x}, ${center.y})`)
+	      .attr("d", arc)
+	      .attr("fill", light.color)
+	      .attr("opacity", 0.8);
+	  
+	  // Label
+	  svg.append("text")
+	      .attr("x", center.x)
+	      .attr("y", center.y - radius + (i + 0.5) * 20)
+	      .attr("text-anchor", "middle")
+	      .attr("font-size", "12px")
+	      .attr("fill", "#444")
+	      .text(light.label);
+      });
+      
+      // Draw hour ticks
+      const ticksToShow = 12;
+      for (let i = 0; i < ticksToShow; i++) {
+	  const hour = i;
+	  const angle = hourToAngle(hour) - Math.PI / 2;
+	  const x1 = center.x + Math.cos(angle) * (radius + 5);
+	  const y1 = center.y + Math.sin(angle) * (radius + 5);
+	  const x2 = center.x + Math.cos(angle) * (radius + 15);
+	  const y2 = center.y + Math.sin(angle) * (radius + 15);
+	  
+	  svg.append("line")
+	      .attr("x1", x1).attr("y1", y1)
+	      .attr("x2", x2).attr("y2", y2)
+	      .attr("stroke", "#888");
+	  
+	  const labelX = center.x + Math.cos(angle) * (radius + 28);
+	  const labelY = center.y + Math.sin(angle) * (radius + 28);
+	  svg.append("text")
+	      .attr("x", labelX)
+	      .attr("y", labelY)
+	      .attr("text-anchor", "middle")
+	      .attr("alignment-baseline", "middle")
+	      .attr("font-size", "11px")
+	      .text(i.toString().padStart(2, '0'));
+      }
+
+     </script>
+    
   </body>
 </html>

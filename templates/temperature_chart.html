@@ -192,9 +192,9 @@
           loadChartData(formatDate(startDate), formatDate(endDate));
       });
       
-      // Optional: auto-load "Last 1 Week" on first page load
+      // Optional: auto-load "Today" on first page load
       window.addEventListener('DOMContentLoaded', () => {
-          document.getElementById('quickRange').value = '1week';
+          document.getElementById('quickRange').value = 'today';
           document.getElementById('quickRange').dispatchEvent(new Event('change'));
       });
     </script>

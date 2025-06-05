@@ -22,6 +22,7 @@ def getTemperatureRecord():
     NUM_READINGS = 10;
     for iteration in range(NUM_READINGS):
         temperature = temperature + temperatureSensor.readTemperature()
+        time.sleep(0.1)
     temperature = temperature/NUM_READINGS;      
     time = datetime.now().strftime("%H:%M")
     date = datetime.now().strftime("%D")

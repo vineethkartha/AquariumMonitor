@@ -3,7 +3,7 @@
             {
                   "Device": "co2",
                   "start": "09:00",
-                  "stop": "16:00",
+                  "stop": "14:00",
                   "manual": false
             },
             {
