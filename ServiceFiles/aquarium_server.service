@@ -4,6 +4,10 @@ After=multi-user.target
 
 [Service]
 ExecStart=/usr/bin/python3 /home/vineeth/AquariumMonitor/AquariumMonitor.py
+Restart=always
+RestartSec=5
+StartLimitIntervalSec=60
+StartLimitBurst=5
 
 [Install]
 WantedBy=multi-user.target
