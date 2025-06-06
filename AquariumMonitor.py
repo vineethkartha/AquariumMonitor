@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, make_response, jsonify
-from AuthUtils import auth_required
+#from AuthUtils import auth_required
 import DS18b20_Module
 import DBUtilities as dbutils
 import JSONUtilities as js
@@ -24,7 +24,7 @@ app=Flask(__name__)
 temperatureSensor = DS18b20_Module.DS18b20()
 
 @app.route('/')
-@auth_required
+#@auth_required
 def index():
 
     [co2start,co2stop] = js.getStartAndStopTime('co2')
@@ -93,7 +93,7 @@ def index():
     return render_template('index.html', **data)
 
 @app.route('/<deviceName>/<action>', methods=['POST'])
-@auth_required
+#@auth_required
 def action(deviceName, action):
     curTime = datetime.now().time()
     [startTime_str,stopTime_str] = js.getStartAndStopTime(deviceName)
@@ -125,7 +125,7 @@ def action(deviceName, action):
     return jsonify({'status': status})
 
 @app.route('/timer', methods=["GET","POST"])
-@auth_required
+#@auth_required
 def timersystem():
     if request.method == "POST":
         startTime = request.form.get("co2_start")
