@@ -38,45 +38,44 @@
       </h1>
       <!-- Info Section -->
       <section class="mb-12">
-	<h2 class="text-2xl font-semibold text-gray-700 mb-6">Aquarium Information</h2>
+	<h2 class="text-2xl font-semibold text-gray-700 mb-6">Live Camera Feed</h2>
 	<!-- Video Stream -->
         <div class="rounded-xl overflow-hidden shadow cursor-pointer" onclick="toggleFullscreen(this)">
           <img src="http://192.168.0.120:8081/" alt="Live Stream" class="w-full h-auto" />
         </div>
+	<br>
+	<h2 class="text-2xl font-semibold text-gray-700 mb-6">Aquarium Information</h2>
 	<!-- Charts -->
 	<!-- CLOCK DIAL + TEMPERATURE OVERVIEW -->
 	<div class="grid md:grid-cols-2 gap-6 mb-6">
 	  
 	  <!-- Clock Dial Chart -->
 	  <div class="bg-white rounded-2xl shadow p-4 flex flex-col items-center justify-center">
-	    <h3 class="text-lg font-semibold mb-2 text-gray-700">Light Timer Clock</h3>
-	    <svg id="clockDial" width="400" height="450"></svg>
+	    <h3 class="text-lg font-semibold mb-2 text-gray-700">Systems Timer Clock</h3>
+	    <svg id="clockDial" width="200" height="250"></svg>
 	  </div>
-	  
+
 	  <!-- Temperature Overview -->
-	  <div class="bg-white rounded-2xl shadow p-4 flex flex-col items-center justify-center">
-	    <h3 class="text-lg font-semibold mb-2 text-gray-700">Temperature Overview</h3>
-	    <div style="width: 400px; height: 450px; border-radius: 8px; overflow: hidden; cursor: pointer;" onclick="location.href='/temperature_chart';">
-	      <iframe
-		src="/temperature_chart?embed=true"
-		width="400"
-		height="450"
-		style="border: none; pointer-events: none;">
-	      </iframe>
+	  <div class="bg-white rounded-2xl shadow p-4 flex flex-col self-start justify-between">
+	    <h3 class="text-lg font-semibold mb-4 text-gray-700">Temperature Info</h3>
+	    
+	    <div class="grid grid-cols-1 gap-2 text-gray-700">
+	      <p><strong>Current:</strong> {{currentTemp}}°C</p>
+	      <p><strong>Max:</strong> {{maxTemp}}°C at {{maxTempTime}}</p>
+	      <p><strong>Min:</strong> {{minTemp}}°C at {{minTempTime}}</p>
 	    </div>
+	    
+	    <p class="text-sm text-gray-500 mt-4">Last updated: {{time}}</p>
+	    <!-- Button to view full temperature chart -->
+	    <button 
+	      onclick="window.location.href='/temperature_chart';" 
+	      class="mt-6 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition duration-200"
+	      >
+	      View Temperature Chart
+	    </button>
 	  </div>
-	  
 	</div>
-	<!-- Text Info -->
-	<div class="bg-white rounded-2xl shadow p-6">
-          <h3 class="text-xl font-semibold mb-4">Temperature Info</h3>
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-gray-700">
-            <p><strong>Current:</strong> {{currentTemp}}°C</p>
-            <p><strong>Max:</strong> {{maxTemp}}°C at {{maxTempTime}}</p>
-            <p><strong>Min:</strong> {{minTemp}}°C at {{minTempTime}}</p>
-          </div>
-          <p class="text-sm text-gray-500 mt-4">Last updated: {{time}}</p>
-	</div>
+
       </section>
       <!-- Device Controls Section -->
       <section>
@@ -300,8 +299,7 @@
 	      .attr("font-size", "11px")
 	      .text(i.toString().padStart(2, '0'));
       }
-
-     </script>
-    
-  </body>
+    </script>
+</div>
+</body>
 </html>
