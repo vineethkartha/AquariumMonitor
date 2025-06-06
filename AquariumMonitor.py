@@ -1,12 +1,16 @@
-from flask import Flask, render_template, request, make_response, jsonify
+from flask import Flask, render_template, request, make_response, jsonify, send_from_directory
+from datetime import datetime
 #from AuthUtils import auth_required
+import RPi.GPIO as GPIO
+import pytz
+import time
+import os
+
+# import custom module created
 import DS18b20_Module
 import DBUtilities as dbutils
 import JSONUtilities as js
-import time
-import RPi.GPIO as GPIO
-from datetime import datetime
-import pytz
+
 
 GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
@@ -20,7 +24,7 @@ GPIO.setup(co2system, GPIO.OUT)
 
 app=Flask(__name__)
 
-# Uncomment this if you have a temperature sensor 
+# Initialise the DS18B20 temperature sensor
 temperatureSensor = DS18b20_Module.DS18b20()
 
 @app.route('/')
@@ -91,6 +95,10 @@ def index():
         'whiteLightState':whiteLightState
         }
     return render_template('index.html', **data)
+
+@app.route('/favicon.ico')
+def favicon():
+    return send_from_directory(os.path.join(app.root_path, 'static'),'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
 @app.route('/<deviceName>/<action>', methods=['POST'])
 #@auth_required
