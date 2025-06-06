@@ -29,7 +29,7 @@
       #chartContainer {
 	  position: relative;
 	  width: 900px;  /* match your canvas width */
-	  height: 400px; /* match your canvas height */
+	  height: 450px; /* match your canvas height */
       }
       
       /* Overlay spinner */
@@ -134,8 +134,8 @@
                           },
                           y: {
                               title: { display: true, text: 'Temperature (°C)' },
-                              min: Math.floor(minTemp * 10) / 10 - 0.2,
-                              max: Math.ceil(maxTemp * 10) / 10 + 0.2,
+                              min: 22,//Math.floor(minTemp * 10) / 10 - 0.2,
+                              max: 32,//Math.ceil(maxTemp * 10) / 10 + 0.2,
                               ticks: { stepSize: 0.1 }
                           }
                       }
