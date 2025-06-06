@@ -7,16 +7,16 @@ def getMaxMinAndCurrentTempData(mDate):
     cursor= connection.cursor()
     queryResult= cursor.execute("select Time, Temperature from AquariumTemperature ORDER BY id DESC LIMIT 1")
     data = queryResult.fetchall()
-    curTemp = data[len(data)-1][1]
+    curTemp = round(data[len(data)-1][1], 2)
 
     minQuery = cursor.execute("select Time,min(Temperature) from AquariumTemperature where Date= :date",{"date":mDate})
     minData= minQuery.fetchall()
-    minTemperature = minData[len(minData)-1][1]
+    minTemperature = round(minData[len(minData)-1][1],2)
     minTempTime = minData[len(minData)-1][0]
 
     maxQuery = cursor.execute("select Time,max(Temperature) from AquariumTemperature where Date= :date",{"date":mDate})
     maxData= maxQuery.fetchall()
-    maxTemperature = maxData[len(maxData)-1][1]
+    maxTemperature = round(maxData[len(maxData)-1][1],2)
     maxTempTime = maxData[len(maxData)-1][0]
     
     return [curTemp, minTemperature, minTempTime, maxTemperature, maxTempTime]
