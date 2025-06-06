@@ -24,10 +24,10 @@ def getTemperatureRecord():
         temperature = temperature + temperatureSensor.readTemperature()
         time.sleep(0.1)
     temperature = temperature/NUM_READINGS;      
-    time = datetime.now().strftime("%H:%M")
+    timeOfRead = datetime.now().strftime("%H:%M")
     date = datetime.now().strftime("%D")
-    print(date,time,temperature)
-    return [date,time, temperature]
+    print(date,timeOfRead,temperature)
+    return [date,timeOfRead, temperature]
 
 createTable()
 while True:
