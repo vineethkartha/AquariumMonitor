@@ -1,202 +1,227 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-full" data-theme="light">
 <head>
-    <meta charset="UTF-8">
-    <title>Temperature Chart</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-</head>
-<body>
-    <h2>Temperature Readings</h2>
+  <meta charset="UTF-8">
+  <title>Temperature Chart</title>
+  <a href="{{ url_for('index') }}"
+   class="inline-block mb-4 text-indigo-600 hover:text-indigo-800 text-sm font-medium underline">
+   ← Back to Home
+</a>
 
-    <label for="quickRange">Quick Range: </label>
-    <select id="quickRange">
-        <option value="">--Select--</option>
-        <option value="today">Today</option>
-        <option value="1week">Last 1 Week</option>
-        <option value="1month">Last 1 Month</option>
-        <option value="6months">Last 6 Months</option>
-        <option value="1year">Last 1 Year</option>
-        <option value="ytd">Year to Date</option>
-    </select>
-    <style>
-      /* Spinner animation */
-      @keyframes spin {
-	  0% { transform: rotate(0deg); }
-	  100% { transform: rotate(360deg); }
-      }
-      
-      /* Container for chart & spinner */
-      #chartContainer {
-	  position: relative;
-	  width: 900px;  /* match your canvas width */
-	  height: 450px; /* match your canvas height */
-      }
-      
-      /* Overlay spinner */
-      #loadingSpinnerOverlay {
-	  display: none;
-	  position: absolute;
-	  top: 0; left: 0;
-	  width: 100%; height: 100%;
-	  background: rgba(255, 255, 255, 0.7); /* semi-transparent white */
-	  z-index: 10;
-	  display: flex;
-	  justify-content: center;
-	  align-items: center;
-      }
-      
-      #loadingSpinnerOverlay div.spinner {
-	  border: 6px solid #f3f3f3;
-	  border-top: 6px solid #3498db;
-	  border-radius: 50%;
-	  width: 36px;
-	  height: 36px;
-	  animation: spin 1s linear infinite;
-      }
-    </style>
-    
-    <div id="chartContainer">
-      <canvas id="temperatureChart" width="900" height="400"></canvas>
-      <div id="loadingSpinnerOverlay">
-	<div class="spinner"></div>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Flatpickr for date picking -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    #loadingSpinnerOverlay {
+      display: none;
+      position: absolute;
+      inset: 0;
+      background: rgba(255, 255, 255, 0.7);
+      z-index: 10;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    [data-theme="dark"] {
+      --bg: #1f2937;
+      --text: #f9fafb;
+      --card: #374151;
+    }
+    [data-theme="light"] {
+      --bg: #f3f4f6;
+      --text: #1f2937;
+      --card: #ffffff;
+    }
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+    }
+  </style>
+</head>
+<body class="min-h-full p-6 font-sans">
+
+  <div class="max-w-4xl mx-auto bg-[var(--card)] shadow-lg rounded-lg p-6 relative">
+    <div class="flex justify-between items-center mb-6">
+      <h2 class="text-2xl font-bold text-indigo-500">📈 Temperature Readings</h2>
+
+      <!-- SLIDER SWITCH -->
+      <div class="flex items-center space-x-3">
+        <span>🌞</span>
+        <label class="relative inline-flex items-center cursor-pointer">
+          <input type="checkbox" id="modeToggleSlider" class="sr-only peer">
+          <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:bg-indigo-600 transition duration-300"></div>
+          <div class="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full shadow transform transition-transform duration-300 peer-checked:translate-x-full"></div>
+        </label>
+        <span>🌙</span>
       </div>
     </div>
-    
-    <script>
-        const ctx = document.getElementById('temperatureChart').getContext('2d');
-        let temperatureChart;
 
-        function formatDate(date) {
-            const month = (date.getMonth() + 1).toString().padStart(2, '0');
-            const day = date.getDate().toString().padStart(2, '0');
-            return `${date.getFullYear()}-${month}-${day}`;
-        }
+    <div class="grid md:grid-cols-3 gap-4 mb-4 items-end">
+      <div>
+        <label for="quickRange" class="block text-sm font-medium mb-1">Quick Range:</label>
+        <select id="quickRange" class="w-full border border-gray-300 rounded-md p-2 bg-white text-gray-800 dark:bg-gray-700 dark:text-white dark:border-gray-500">
+          <option value="">--Select--</option>
+          <option value="today">Today</option>
+          <option value="1week">Last 1 Week</option>
+          <option value="1month">Last 1 Month</option>
+          <option value="6months">Last 6 Months</option>
+          <option value="1year">Last 1 Year</option>
+          <option value="ytd">Year to Date</option>
+          <option value="custom">Custom Range</option>
+        </select>
+      </div>
 
-      function loadChartData(startDate, endDate) {
-	  const spinnerOverlay = document.getElementById('loadingSpinnerOverlay');
-	  spinnerOverlay.style.display = 'flex'; // Show overlay spinner
+      <div id="customDateStart" class="hidden">
+        <label class="block text-sm font-medium mb-1">Start Date:</label>
+        <input id="startDate" class="w-full border border-gray-300 rounded-md p-2 bg-white text-gray-800 dark:bg-gray-700 dark:text-white dark:border-gray-500"/>
+      </div>
 
-          fetch(`/temperature_chart_data?start_date=${startDate}&end_date=${endDate}`)
-              .then(response => response.json())
-              .then(data => {
-		  spinnerOverlay.style.display = 'none'; // Hide overlay spinner
-                  if (!Array.isArray(data) || data.length === 0) {
-                      alert("No data available for this range.");
-                      return;
-                  }
-		  
-                  const labels = data.map(entry => entry.timestamp);
-                  const temperatures = data.map(entry => entry.temperature);
-		  
-                  const minTemp = Math.min(...temperatures);
-                  const maxTemp = Math.max(...temperatures);
-                  const avgTemp = temperatures.reduce((a, b) => a + b, 0) / temperatures.length;
-		  
-                  const pointColors = temperatures.map(temp =>
-						       temp === minTemp ? 'blue' :
-						       temp === maxTemp ? 'red' :
-						       'rgba(75, 192, 192, 1)'
-						      );
-		  
-                  const pointSizes = temperatures.map(temp =>
-						      (temp === minTemp || temp === maxTemp) ? 6 : 2
-						     );
-		  
-                  const chartData = {
-                      labels: labels,
-                      datasets: [
-                          {
-                              label: 'Temperature (°C)',
-                              data: temperatures,
-                              borderColor: 'rgba(75, 192, 192, 1)',
-                              pointBackgroundColor: pointColors,
-                              pointRadius: pointSizes,
-                              fill: false,
-                              tension: 0.5
-                          },
-                          {
-                              label: `Average (${avgTemp.toFixed(1)}°C)`,
-                              data: Array(temperatures.length).fill(avgTemp),
-                              borderColor: 'rgba(255, 205, 86, 0.8)',
-                              borderDash: [6, 6],
-                              pointRadius: 0,
-                              fill: false
-                          }
-                      ]
-                  };
-		  
-                  const chartOptions = {
-                      responsive: true,
-                      scales: {
-                          x: {
-                              title: { display: true, text: 'Date & Time' },
-                              ticks: { maxRotation: 60, minRotation: 45 }
-                          },
-                          y: {
-                              title: { display: true, text: 'Temperature (°C)' },
-                              min: 22,//Math.floor(minTemp * 10) / 10 - 0.2,
-                              max: 32,//Math.ceil(maxTemp * 10) / 10 + 0.2,
-                              ticks: { stepSize: 0.1 }
-                          }
-                      }
-                  };
-		  
-                  if (temperatureChart) {
-                      temperatureChart.destroy();
-                  }
-		  
-                  temperatureChart = new Chart(ctx, {
-                      type: 'line',
-                      data: chartData,
-                      options: chartOptions
-                  });
-              })
-	      .catch(error => {
-		  spinnerOverlay.style.display = 'none'; // Hide overlay spinner
-		  console.error('Fetch error:', error);
-		  alert("Failed to load data.");
-              });
-      }
-      
-      document.getElementById('quickRange').addEventListener('change', function () {
-          const today = new Date();
-          let startDate, endDate = today;
-	  
-          switch (this.value) {
-          case 'today':
-              startDate = today;
-              break;
-          case '1week':
-              startDate = new Date(today);
-              startDate.setDate(today.getDate() - 7);
-                    break;
-          case '1month':
-              startDate = new Date(today);
-              startDate.setMonth(today.getMonth() - 1);
-              break;
-          case '6months':
-              startDate = new Date(today);
-              startDate.setMonth(today.getMonth() - 6);
-              break;
-                case '1year':
-                    startDate = new Date(today);
-              startDate.setFullYear(today.getFullYear() - 1);
-              break;
-          case 'ytd':
-              startDate = new Date(today.getFullYear(), 0, 1);
-              break;
-          default:
-              return;
+      <div id="customDateEnd" class="hidden">
+        <label class="block text-sm font-medium mb-1">End Date:</label>
+        <input id="endDate" class="w-full border border-gray-300 rounded-md p-2 bg-white text-gray-800 dark:bg-gray-700 dark:text-white dark:border-gray-500"/>
+      </div>
+    </div>
+
+    <div id="chartContainer" class="relative">
+      <canvas id="temperatureChart" height="400"></canvas>
+      <div id="loadingSpinnerOverlay">
+        <div class="animate-spin rounded-full h-10 w-10 border-4 border-blue-400 border-t-transparent"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    flatpickr("#startDate", { dateFormat: "Y-m-d" });
+    flatpickr("#endDate", { dateFormat: "Y-m-d" });
+
+    const ctx = document.getElementById('temperatureChart').getContext('2d');
+    let temperatureChart;
+
+    function formatDate(date) {
+      const m = `${date.getMonth()+1}`.padStart(2,'0');
+      const d = `${date.getDate()}`.padStart(2,'0');
+      return `${date.getFullYear()}-${m}-${d}`;
+    }
+
+    function getDatesAndLoad() {
+      let s = document.getElementById('startDate').value;
+      let e = document.getElementById('endDate').value;
+      if (s && e) loadChartData(s, e);
+    }
+
+    function loadChartData(startDate, endDate) {
+      document.getElementById('loadingSpinnerOverlay').style.display = 'flex';
+      fetch(`/temperature_chart_data?start_date=${startDate}&end_date=${endDate}`)
+        .then(res => res.json())
+        .then(data => {
+          document.getElementById('loadingSpinnerOverlay').style.display = 'none';
+          if (!Array.isArray(data) || data.length == 0) {
+            alert("No data available for this range.");
+            return;
           }
-	  
-          loadChartData(formatDate(startDate), formatDate(endDate));
-      });
-      
-      // Optional: auto-load "Today" on first page load
-      window.addEventListener('DOMContentLoaded', () => {
-          document.getElementById('quickRange').value = 'today';
-          document.getElementById('quickRange').dispatchEvent(new Event('change'));
-      });
-    </script>
+          const labels = data.map(e => e.timestamp);
+          const temps = data.map(e => e.temperature);
+          const minT = Math.min(...temps), maxT = Math.max(...temps);
+          const avgT = temps.reduce((a,b)=>a+b)/temps.length;
+
+          const colors = temps.map(t => t === minT ? '#3b82f6' :
+                                t === maxT ? '#ef4444' : '#10b981');
+          const sizes = temps.map(t => (t===minT||t===maxT)?6:3);
+
+          const chartData = {
+            labels,
+            datasets: [{
+              label: 'Temperature (°C)',
+              data: temps,
+              borderColor: '#10b981',
+              pointBackgroundColor: colors,
+              pointRadius: sizes,
+              fill: false,
+              tension: 0.4
+            },{
+              label: `Average (${avgT.toFixed(1)}°C)`,
+              data: Array(temps.length).fill(avgT),
+              borderColor: '#facc15',
+              borderDash: [6,4],
+              pointRadius: 0,
+              fill: false
+            }]
+          };
+
+          const chartOptions = {
+            responsive: true,
+            interaction: { mode: 'nearest', intersect: false },
+            plugins: {
+              tooltip: { enabled: true, mode: 'nearest', intersect: false }
+            },
+            scales: {
+              x: { title: { display: true, text: 'Date & Time' }},
+              y: {
+                title: { display: true, text: 'Temperature (°C)' },
+                min: Math.floor(minT) - 1,
+                max: Math.ceil(maxT) + 1,
+              }
+            }
+          };
+
+          if (temperatureChart) temperatureChart.destroy();
+          temperatureChart = new Chart(ctx, { type:'line', data: chartData, options:chartOptions });
+        })
+        .catch(err => {
+          document.getElementById('loadingSpinnerOverlay').style.display = 'none';
+          console.error(err);
+          alert("Failed to load data.");
+        });
+    }
+
+    document.getElementById('quickRange').addEventListener('change', function () {
+      const value = this.value;
+      const isCustom = value === 'custom';
+
+      document.getElementById('customDateStart').classList.toggle('hidden', !isCustom);
+      document.getElementById('customDateEnd').classList.toggle('hidden', !isCustom);
+
+      if (isCustom) return;
+
+      const today = new Date();
+      let startDate = today, endDate = today;
+
+      switch (value) {
+        case '1week': startDate = new Date(today); startDate.setDate(today.getDate() - 7); break;
+        case '1month': startDate = new Date(today); startDate.setMonth(today.getMonth() - 1); break;
+        case '6months': startDate = new Date(today); startDate.setMonth(today.getMonth() - 6); break;
+        case '1year': startDate = new Date(today); startDate.setFullYear(today.getFullYear() - 1); break;
+        case 'ytd': startDate = new Date(today.getFullYear(), 0, 1); break;
+        case 'today': startDate = today; break;
+        default: return;
+      }
+
+      document.getElementById('startDate')._flatpickr.setDate(formatDate(startDate));
+      document.getElementById('endDate')._flatpickr.setDate(formatDate(endDate));
+      getDatesAndLoad();
+    });
+
+    document.getElementById('startDate').addEventListener('change', getDatesAndLoad);
+    document.getElementById('endDate').addEventListener('change', getDatesAndLoad);
+
+    window.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('startDate')._flatpickr.setDate(formatDate(new Date()));
+      document.getElementById('endDate')._flatpickr.setDate(formatDate(new Date()));
+      getDatesAndLoad();
+    });
+
+    document.getElementById('modeToggleSlider').addEventListener('change', (e) => {
+      const root = document.documentElement;
+      const isDark = e.target.checked;
+      root.setAttribute('data-theme', isDark ? 'dark' : 'light');
+    });
+  </script>
 </body>
 </html>
