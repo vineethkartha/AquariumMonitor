@@ -1,305 +1,198 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Aquarium Monitor</title>
-    
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Toggle Device Script -->
-    <script>
-      function toggleDevice(deviceName) {
-	  fetch(`/${deviceName}/toggle`, {
-	      method: 'POST',
-	      headers: {
-		  'Content-Type': 'application/json'
-	      }
-	  })
-	      .then(response => {
-		  if (!response.ok) throw new Error("Failed to toggle");
-		  return response.json();
-	      })
-	      .then(data => {
-		  console.log(`${deviceName} toggled: ${data.status}`);
-	      })
-	      .catch(err => {
-		  console.error("Toggle error:", err);
-	      });
-      }
-    </script>
-  </head>
-  
-  <body class="bg-blue-50 font-sans">
-    <div class="max-w-6xl mx-auto p-6">
-      <h1 class="text-4xl font-bold text-center text-white bg-blue-500 py-6 rounded-2xl shadow mb-8">
-	Aquarium Monitor
-      </h1>
-      <!-- Info Section -->
-      <section class="mb-12">
-	<h2 class="text-2xl font-semibold text-gray-700 mb-6">Live Camera Feed</h2>
-	<!-- Video Stream -->
-        <div class="rounded-xl overflow-hidden shadow cursor-pointer" onclick="toggleFullscreen(this)">
-          <img src="http://192.168.0.120:8081/" alt="Live Stream" class="w-full h-auto" />
+<html lang="en" class="h-full" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Aquarium Monitor</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+
+  <style>
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      transition: background .3s, color .3s;
+    }
+    [data-theme="light"] {
+      --bg: #f8fafc;
+      --text: #1f2937;
+      --card: #ffffff;
+    }
+    [data-theme="dark"] {
+      --bg: #1f2937;
+      --text: #f3f4f6;
+      --card: #374151;
+    }
+  </style>
+</head>
+<body class="min-h-full">
+
+  <!-- NAV BAR -->
+  <nav class="bg-[var(--card)] shadow px-6 py-4 flex justify-between items-center">
+    <div class="flex items-center space-x-4">
+      <span class="text-lg font-bold">🏠 Aquarium Monitor</span>
+      <a href="{{ url_for('temperature_chart') }}" class="text-lg hover:text-indigo-400">📈 Temperature</a>
+    </div>
+    <div class="flex items-center space-x-2">
+      <span>🌞</span>
+      <label class="relative inline-flex items-center cursor-pointer">
+        <input id="modeToggleSlider" type="checkbox" class="sr-only peer">
+        <div class="w-11 h-6 rounded-full bg-gray-300 peer-checked:bg-indigo-500 transition"></div>
+        <div class="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full shadow transform transition peer-checked:translate-x-full"></div>
+      </label>
+      <span>🌙</span>
+    </div>
+  </nav>
+
+  <div class="max-w-6xl mx-auto p-6 space-y-12">
+
+    <!-- LIVE STREAM -->
+    <section>
+      <h2 class="text-2xl font-semibold mb-4">Live Camera Feed</h2>
+      <div class="relative rounded-xl overflow-hidden shadow-lg">
+        <img id="liveFeed"
+             src="http://192.168.0.120:8081/"
+             alt="Live Stream"
+             class="w-full h-auto cursor-pointer"
+             onclick="toggleFullscreen(this)"
+             onerror="this.onerror=null; this.src='/static/fallback.jpg';" />
+        <button onclick="toggleFullscreen(this.parentElement.querySelector('img'))"
+                class="absolute top-2 right-2 bg-[var(--card)] bg-opacity-75 p-2 rounded-full hover:bg-opacity-100 transition">
+          ⛶
+        </button>
+      </div>
+    </section>
+
+    <!-- AQUARIUM INFO -->
+    <section>
+      <h2 class="text-2xl font-semibold mb-4">Aquarium Information</h2>
+      <div class="mb-6 bg-[var(--card)] rounded-2xl shadow p-6 space-y-4">
+        <div class="flex justify-between items-center">
+          <h3 class="text-xl font-semibold">Temperature Info</h3>
+          <span id="tempBadge" class="px-3 py-1 font-semibold rounded-md"></span>
         </div>
-	<br>
-	<h2 class="text-2xl font-semibold text-gray-700 mb-6">Aquarium Information</h2>
-	<!-- Charts -->
-	<!-- CLOCK DIAL + TEMPERATURE OVERVIEW -->
-	<div class="grid md:grid-cols-2 gap-6 mb-6">
-	  
-	  <!-- Clock Dial Chart -->
-	  <div class="bg-white rounded-2xl shadow p-4 flex flex-col items-center justify-center">
-	    <h3 class="text-lg font-semibold mb-2 text-gray-700">Systems Timer Clock</h3>
-	    <svg id="clockDial" width="200" height="250"></svg>
-	  </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <p><strong>Current:</strong> {{ currentTemp }}°C</p>
+          <p><strong>Max:</strong> {{ maxTemp }}°C at {{ maxTempTime }}</p>
+          <p><strong>Min:</strong> {{ minTemp }}°C at {{ minTempTime }}</p>
+        </div>
+        <p class="text-sm text-gray-500">Last updated: {{ time }}</p>
+        <button onclick="window.location.href='{{ url_for('temperature_chart') }}';"
+                class="mt-4 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg">
+          View Full Temperature Chart
+        </button>
+      </div>
 
-	  <!-- Temperature Overview -->
-	  <div class="bg-white rounded-2xl shadow p-4 flex flex-col self-start justify-between">
-	    <h3 class="text-lg font-semibold mb-4 text-gray-700">Temperature Info</h3>
-	    
-	    <div class="grid grid-cols-1 gap-2 text-gray-700">
-	      <p><strong>Current:</strong> {{currentTemp}}°C</p>
-	      <p><strong>Max:</strong> {{maxTemp}}°C at {{maxTempTime}}</p>
-	      <p><strong>Min:</strong> {{minTemp}}°C at {{minTempTime}}</p>
-	    </div>
-	    
-	    <p class="text-sm text-gray-500 mt-4">Last updated: {{time}}</p>
-	    <!-- Button to view full temperature chart -->
-	    <button 
-	      onclick="window.location.href='/temperature_chart';" 
-	      class="mt-6 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition duration-200"
-	      >
-	      View Temperature Chart
-	    </button>
-	  </div>
-	</div>
+      <!-- CLOCK & LEGEND -->
+      <div class="bg-[var(--card)] rounded-2xl shadow p-6">
+        <h3 class="text-xl font-semibold mb-4">Systems Timer Clock</h3>
+        <div class="flex flex-col md:flex-row items-center gap-8">
+          <svg id="clockDial" width="400" height="450"></svg>
+          <ul id="clockLegend" class="space-y-2"></ul>
+        </div>
+      </div>
+    </section>
 
-      </section>
-      <!-- Device Controls Section -->
-      <section>
-	<h2 class="text-2xl font-semibold text-gray-700 mb-6">Device Controls</h2>
-	<form action="{{ url_for('timersystem') }}" method="post">
-          <div class="grid md:grid-cols-3 gap-6">
-            
-            <!-- CO2 System -->
-            <div class="bg-white rounded-2xl shadow p-6 flex flex-col justify-between">
-              <div>
-		<div class="flex justify-between items-center mb-6">
-                  <h3 class="text-xl font-semibold">CO₂ System</h3>
-		  <label class="relative inline-flex items-center cursor-pointer">
-		    <input type="checkbox" class="sr-only peer" onclick="toggleDevice('co2')"
-			   {% if co2checkboxVal == 'checked' or co2PinState %}checked{% endif %}>
-  
-		    <!-- Switch Track -->
-		    <div class="w-11 h-6 bg-gray-300 rounded-full transition-all peer-checked:bg-blue-500"></div>
-  
-		    <!-- Switch Thumb -->
-		    <div class="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full transition-transform
-				peer-checked:translate-x-5 pointer-events-none"></div>
-		  </label>		  
-		</div>
-		<div class="space-y-4">
-                  <label class="block">
-                    <span class="text-gray-700">Start Time</span>
-                    <input type="time" id="co2_start" name="co2_start" value="{{ co2start }}" class="mt-1 block w-full rounded border-gray-300 shadow-sm" />
-                  </label>
-                  <label class="block">
-                    <span class="text-gray-700">Stop Time</span>
-                    <input type="time" id="co2_stop" name="co2_stop" value="{{ co2stop }}" class="mt-1 block w-full rounded border-gray-300 shadow-sm" />
-                  </label>
-		</div>
+    <!-- DEVICE CONTROLS -->
+    <section>
+      <h2 class="text-2xl font-semibold mb-6">Device Controls</h2>
+      <form action="{{ url_for('timersystem') }}" method="post" class="space-y-6">
+        {% for dev, cfg in devices.items() %}
+        <div class="bg-[var(--card)] rounded-2xl shadow p-6 flex flex-col md:flex-row items-center gap-6">
+          <div class="flex-1">
+            <h3 class="text-xl font-semibold mb-2">
+              {% if dev == 'co2' %}🧪 CO₂ System
+              {% elif dev == 'rgb' %}🌈 RGB Light
+              {% else %}💡 White Light{% endif %}
+            </h3>
+            <label class="relative inline-flex items-center cursor-pointer mb-4">
+              <input type="checkbox" class="sr-only peer"
+                     onclick="toggleDevice('{{ dev }}')"
+                     {% if cfg.checked == 'checked' or cfg.state %}checked{% endif %}>
+              <div class="w-11 h-6 rounded-full bg-gray-300 peer-checked:bg-blue-500 transition"></div>
+              <div class="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full shadow transform transition peer-checked:translate-x-full"></div>
+            </label>
+            <div class="flex gap-4">
+              {% for t in ['start', 'stop'] %}
+              <div class="flex flex-col">
+                <label class="text-sm font-medium mb-1">{{ t|capitalize }} Time</label>
+                <input type="text"
+                       id="{{ dev }}_{{ t }}"
+                       name="{{ dev }}_{{ t }}"
+                       value="{{ cfg[t] }}"
+                       class="flatpickr border rounded p-2 bg-white text-gray-900 dark:bg-gray-700 dark:text-white dark:border-gray-500" />
               </div>
-              <span class="mt-4 block text-center text-sm text-gray-500">{{ 'On' if co2checkboxVal == 'checked' or co2PinState else 'Off' }}</span>
+              {% endfor %}
             </div>
-
-            <!-- RGB Light -->
-            <div class="bg-white rounded-2xl shadow p-6 flex flex-col justify-between">
-              <div>
-		<div class="flex justify-between items-center mb-6">
-                  <h3 class="text-xl font-semibold">RGB Light</h3>
-		  <label class="relative inline-flex items-center cursor-pointer">
-		    <input type="checkbox" class="sr-only peer" onclick="toggleDevice('rgb')"
-			   {% if rgbcheckboxVal == 'checked' or rgbLightState %}checked{% endif %}>
-  
-		    <!-- Switch Track -->
-		    <div class="w-11 h-6 bg-gray-300 rounded-full transition-all peer-checked:bg-blue-500"></div>
-  
-		    <!-- Switch Thumb -->
-		    <div class="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full transition-transform
-				peer-checked:translate-x-5 pointer-events-none"></div>
-		  </label>		  
-		</div>
-		<div class="space-y-4">
-                  <label class="block">
-                    <span class="text-gray-700">Start Time</span>
-                    <input type="time" id="rgb_start" name="rgb_start" value="{{ rgbstart }}" class="mt-1 block w-full rounded border-gray-300 shadow-sm" />
-                  </label>
-                  <label class="block">
-                    <span class="text-gray-700">Stop Time</span>
-                    <input type="time" id="rgb_stop" name="rgb_stop" value="{{ rgbstop }}" class="mt-1 block w-full rounded border-gray-300 shadow-sm" />
-                  </label>
-		</div>
-              </div>
-              <span class="mt-4 block text-center text-sm text-gray-500">{{ 'On' if rgbcheckboxVal == 'checked' or rgbLightState else 'Off' }}</span>
-            </div>
-
-            <!-- White Light -->
-            <div class="bg-white rounded-2xl shadow p-6 flex flex-col justify-between">
-              <div>
-		<div class="flex justify-between items-center mb-6">
-                  <h3 class="text-xl font-semibold">White Light</h3>
-		  <label class="relative inline-flex items-center cursor-pointer">
-		    <input type="checkbox" class="sr-only peer" onclick="toggleDevice('white')"
-			   {% if whitecheckboxVal == 'checked' or whiteLightState %}checked{% endif %}>
-  
-		    <!-- Switch Track -->
-		    <div class="w-11 h-6 bg-gray-300 rounded-full transition-all peer-checked:bg-blue-500"></div>
-  
-		    <!-- Switch Thumb -->
-		    <div class="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full transition-transform
-				peer-checked:translate-x-5 pointer-events-none"></div>
-		  </label>		 
-		</div>
-		<div class="space-y-4">
-                  <label class="block">
-                    <span class="text-gray-700">Start Time</span>
-                    <input type="time" id="white_start" name="white_start" value="{{ whitestart }}" class="mt-1 block w-full rounded border-gray-300 shadow-sm" />
-                  </label>
-                  <label class="block">
-                    <span class="text-gray-700">Stop Time</span>
-                    <input type="time" id="white_stop" name="white_stop" value="{{ whitestop }}" class="mt-1 block w-full rounded border-gray-300 shadow-sm" />
-                  </label>
-		</div>
-              </div>
-              <span class="mt-4 block text-center text-sm text-gray-500">{{ 'On' if whitecheckboxVal == 'checked' or whiteLightState else 'Off' }}</span>
-            </div>
-
           </div>
 
-          <button type="submit" class="mt-8 w-full bg-green-500 text-white py-4 rounded-2xl hover:bg-green-600 text-lg">
-            Save All Schedules
-          </button>
-	</form>
-      </section>
+          <span class="block text-lg font-medium {% if cfg.checked == 'checked' or cfg.state %}text-green-600{% else %}text-gray-500{% endif %}">
+            {% if cfg.checked == 'checked' or cfg.state %}On{% else %}Off{% endif %}
+          </span>
+        </div>
+        {% endfor %}
+        <button type="submit" class="w-full bg-green-500 hover:bg-green-600 text-white py-3 rounded-2xl text-lg font-medium">
+          Save All Schedules
+        </button>
+      </form>
+    </section>
+  </div>
 
-    </div>
-    <script>
-      function toggleFullscreen(elem) {
-          const target = elem.querySelector("img");
-          if (document.fullscreenElement) {
-              document.exitFullscreen();
-          } else if (target.requestFullscreen) {
-              target.requestFullscreen();
-          } else if (target.webkitRequestFullscreen) {
-              target.webkitRequestFullscreen();
-          } else if (target.msRequestFullscreen) {
-              target.msRequestFullscreen();
-          }
-      }
-    </script>
-    <!-- D3 Clock Dial Script -->
-    <script src="https://d3js.org/d3.v7.min.js"></script>
-    <script>
-      const svg = d3.select("#clockDial");
-      const width = +svg.attr("width");
-      const height = +svg.attr("height");
-      const radius = Math.min(width, height) / 2 - 20;
-      const center = { x: width / 2, y: height / 2 };
-      
-      // Convert "HH:MM" to float hour
-      function timeToHour(str) {
-	  const [h, m] = str.split(":").map(Number);
-	  return ((h + m / 60));
-      }
-      
-      // Light periods from Jinja variables
-      const lights = [
-	  {
-	      start: timeToHour("{{ co2start }}"),
-	      end: timeToHour("{{ co2stop }}"),
-	      color: "orange",
-	      label: "CO₂"
-	  }
-	  ,
-	  {
-	      start: timeToHour("{{ rgbstart }}"),
-	      end: timeToHour("{{ rgbstop }}"),
-	      color: "steelblue",
-	      label: "RGB"
-	  },
-	  {
-	      start: timeToHour("{{ whitestart }}"),
-	      end: timeToHour("{{ whitestop }}"),
-	      color: "goldenrod",
-	      label: "White"
-	  }
-      ];
-      
-      // Normalize duration
-      lights.forEach(l => {
-	  if (l.end < l.start) l.end += 24; // handle overnight timers
-      });
-      
-      // Convert hour to radians
-      function hourToAngle(hour) {
-	  return (hour / 12) *2* Math.PI;// - Math.PI / 2;
-      }
-      
-      // Draw arcs
-      lights.forEach((light, i) => {
-	  const startAngle = hourToAngle(light.start);
-	  const endAngle = hourToAngle(light.end);
-	  console.log(startAngle, endAngle)
-	  const arc = d3.arc()
-		.innerRadius(radius - (i + 1) * 20)
-		.outerRadius(radius - i * 20)
-		.startAngle(startAngle)
-		.endAngle(endAngle);
-	  
-	  svg.append("path")
-	      .attr("transform", `translate(${center.x}, ${center.y})`)
-	      .attr("d", arc)
-	      .attr("fill", light.color)
-	      .attr("opacity", 0.8);
-	  
-	  // Label
-	  svg.append("text")
-	      .attr("x", center.x)
-	      .attr("y", center.y - radius + (i + 0.5) * 20)
-	      .attr("text-anchor", "middle")
-	      .attr("font-size", "12px")
-	      .attr("fill", "#444")
-	      .text(light.label);
-      });
-      
-      // Draw hour ticks
-      const ticksToShow = 12;
-      for (let i = 0; i < ticksToShow; i++) {
-	  const hour = i;
-	  const angle = hourToAngle(hour) - Math.PI / 2;
-	  const x1 = center.x + Math.cos(angle) * (radius + 5);
-	  const y1 = center.y + Math.sin(angle) * (radius + 5);
-	  const x2 = center.x + Math.cos(angle) * (radius + 15);
-	  const y2 = center.y + Math.sin(angle) * (radius + 15);
-	  
-	  svg.append("line")
-	      .attr("x1", x1).attr("y1", y1)
-	      .attr("x2", x2).attr("y2", y2)
-	      .attr("stroke", "#888");
-	  
-	  const labelX = center.x + Math.cos(angle) * (radius + 28);
-	  const labelY = center.y + Math.sin(angle) * (radius + 28);
-	  svg.append("text")
-	      .attr("x", labelX)
-	      .attr("y", labelY)
-	      .attr("text-anchor", "middle")
-	      .attr("alignment-baseline", "middle")
-	      .attr("font-size", "11px")
-	      .text(i.toString().padStart(2, '0'));
-      }
-    </script>
-</div>
+  <!-- SCRIPTS -->
+  <script>
+    const deviceTimes = {{ devices | tojson }};
+    document.getElementById('modeToggleSlider').addEventListener('change', e => {
+      document.documentElement.setAttribute('data-theme', e.target.checked ? 'dark' : 'light');
+    });
+    document.querySelectorAll('.flatpickr').forEach(el =>
+      flatpickr(el, { enableTime: true, noCalendar: true, dateFormat: "H:i" })
+    );
+    function toggleFullscreen(img) {
+      document.fullscreenElement ? document.exitFullscreen() : img.requestFullscreen();
+    }
+    const temp = parseFloat("{{ currentTemp }}");
+    const badge = document.getElementById('tempBadge');
+    badge.textContent = temp > 28 ? '🔥 High' : temp < 24 ? '❄️ Low' : '✅ Normal';
+
+    // D3 Clock
+    document.addEventListener('DOMContentLoaded', () => {
+	const svg = d3.select("#clockDial");
+	const width = +svg.attr("width"), height = +svg.attr("height");
+	const r = Math.min(width, height)/2 - 20, center = { x: width/2, y: height/2 };
+	const lights = Object.entries(deviceTimes).map(([dev, cfg], i) => ({
+	    start: cfg.start, end: cfg.stop,
+	    color: ['co2','rgb','white'][i] === 'co2' ? 'orange' :
+		['co2','rgb','white'][i] === 'rgb' ? 'steelblue' : 'goldenrod',
+	    label: dev.toUpperCase()
+	})).map(d => {
+	    const [h1, m1] = d.start.split(':').map(Number);
+	    const [h2, m2] = d.end.split(':').map(Number);
+	    d.s = h1 + m1/60; d.e = h2 + m2/60;
+	    if (d.e < d.s) d.e += 24;
+	    return d;
+	});
+	
+	lights.forEach((d, i) => {
+	    const arc = d3.arc().innerRadius(r - 30*(i+1)).outerRadius(r - 30*i)
+		  .startAngle(d.s/12*2*Math.PI).endAngle(d.e/12*2*Math.PI);
+	    svg.append("path")
+		.attr("transform", `translate(${center.x},${center.y})`)
+		.attr("d", arc).attr("fill", d.color).attr("opacity", 0.7)
+		.on("mouseover", () => legendItems[i].classList.add("font-bold"))
+		.on("mouseout", () => legendItems[i].classList.remove("font-bold"));
+	});
+	
+	const legend = d3.select("#clockLegend");
+	const legendItems = [];
+	lights.forEach(d => {
+	    const li = legend.append("li").attr("class", "flex items-center space-x-2");
+	    li.append("span").attr("class", "w-4 h-4 rounded-full").style("background", d.color);
+	    li.append("span").text(d.label);
+	    legendItems.push(li);
+	});
+    });
+  </script>
 </body>
 </html>

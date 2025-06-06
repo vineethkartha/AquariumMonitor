@@ -71,7 +71,28 @@ def index():
         minTempTime="NaN"
         maxTemp="NaN"
         maxTempTime="NaN"
-        
+
+    devices = {
+        'co2': {
+            'start': co2start,
+            'stop': co2stop,
+            'state': co2PinState,
+            'checked': co2checkboxVal
+        },
+        'rgb': {
+            'start': rgbstart,
+            'stop': rgbstop,
+            'state': rgbLightState,
+            'checked': rgbcheckboxVal
+        },
+        'white': {
+            'start': whitestart,
+            'stop': whitestop,
+            'state': whiteLightState,
+            'checked': whitecheckboxVal
+        }
+    }
+    
     data = {
         'title': 'My Aquarium Page',
         'time': curTimeStr,
@@ -81,19 +102,8 @@ def index():
         'maxTemp': maxTemp,
         'maxTempTime': maxTempTime,
         'currentTemp': curTemp,
-        'co2start':co2start,
-        'co2stop':co2stop,
-        'co2checkboxVal':co2checkboxVal,
-        'co2PinState':co2PinState,
-        'rgbstart':rgbstart,
-        'rgbstop':rgbstop,
-        'rgbcheckboxVal':rgbcheckboxVal,
-        'rgbLightState':rgbLightState,        
-        'whitestart':whitestart,
-        'whitestop':whitestop,
-        'whitecheckboxVal':whitecheckboxVal,
-        'whiteLightState':whiteLightState
-        }
+        'devices': devices  # << ✅ add this
+    }
     return render_template('index.html', **data)
 
 @app.route('/favicon.ico')
