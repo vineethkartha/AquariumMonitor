@@ -35,7 +35,8 @@ def index():
     [rgbstart,rgbstop] =js.getStartAndStopTime('rgb')
     [whitestart,whitestop] = js.getStartAndStopTime('white')
     curTime = datetime.now()
-    curTimeStr = curTime.strftime("%D  %H:%M")
+    curTimeStr = curTime.strftime("%H:%M")
+    curTimeStampStr = curTime.strftime("%D  %H:%M")
     curDate = curTime.strftime("%D")
     
     co2manualOverride = js.getManualOverride('co2')
@@ -95,7 +96,8 @@ def index():
     
     data = {
         'title': 'My Aquarium Page',
-        'time': curTimeStr,
+        'timestamp': curTimeStampStr,
+        'time':curTimeStr,
         'gantturl': gantChartURL,
         'minTemp': minTemp,
         'minTempTime': minTempTime,
