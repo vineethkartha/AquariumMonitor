@@ -214,13 +214,17 @@
     window.addEventListener('DOMContentLoaded', () => {
       document.getElementById('startDate')._flatpickr.setDate(formatDate(new Date()));
       document.getElementById('endDate')._flatpickr.setDate(formatDate(new Date()));
-      getDatesAndLoad();
+	getDatesAndLoad();
+	const toggle = document.getElementById('modeToggleSlider');
+	const savedTheme = localStorage.getItem('theme') || 'dark';
+	document.documentElement.setAttribute('data-theme', savedTheme);
+	toggle.checked = savedTheme === 'dark';
     });
 
     document.getElementById('modeToggleSlider').addEventListener('change', (e) => {
-      const root = document.documentElement;
-      const isDark = e.target.checked;
-      root.setAttribute('data-theme', isDark ? 'dark' : 'light');
+	const newTheme = toggle.checked ? 'dark' : 'light';
+	document.documentElement.setAttribute('data-theme', newTheme);
+	localStorage.setItem('theme', newTheme);
     });
   </script>
 </body>
