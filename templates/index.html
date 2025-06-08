@@ -9,6 +9,27 @@
   <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
   <script src="https://d3js.org/d3.v7.min.js"></script>
 
+  <!-- Toggle Device Script -->
+  <script>
+    function toggleDevice(deviceName) {
+	fetch(`/${deviceName}/toggle`, {
+	    method: 'POST',
+	    headers: {
+		'Content-Type': 'application/json'
+	    }
+	})
+	    .then(response => {
+		if (!response.ok) throw new Error("Failed to toggle");
+		return response.json();
+	    })
+	    .then(data => {
+		console.log(`${deviceName} toggled: ${data.status}`);
+	    })
+	    .catch(err => {
+		console.error("Toggle error:", err);
+	    });
+    }
+  </script>
   <style>
     body {
       background-color: var(--bg);
