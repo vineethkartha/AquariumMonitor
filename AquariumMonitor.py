@@ -1,7 +1,8 @@
 from flask import Flask, render_template, request, make_response, jsonify, send_from_directory
 from datetime import datetime
+# Use the below import if using an authentication system
 #from AuthUtils import auth_required
-import RPi.GPIO as GPIO
+from gpio_client import register, set_gpio, get_gpio
 import pytz
 import time
 import os
@@ -11,16 +12,6 @@ import DS18b20_Module
 import DBUtilities as dbutils
 import JSONUtilities as js
 
-
-GPIO.setmode(GPIO.BCM)
-GPIO.setwarnings(False)
-whiteLight = 6
-rgbLight = 5
-co2system = 26
-
-GPIO.setup(whiteLight, GPIO.OUT)
-GPIO.setup(rgbLight, GPIO.OUT)
-GPIO.setup(co2system, GPIO.OUT)
 
 app=Flask(__name__)
 
@@ -43,9 +34,9 @@ def index():
     whitemanualOverride = js.getManualOverride('white')
     rgbmanualOverride = js.getManualOverride('rgb')
 
-    co2PinState = GPIO.input(co2system)
-    whiteLightState = GPIO.input(whiteLight)
-    rgbLightState = GPIO.input(rgbLight)
+    co2PinState = get_gpio("co2").get("state")
+    whiteLightState = get_gpio("white").get("state")
+    rgbLightState = get_gpio("rgb").get("state")
     
     if co2manualOverride:
         co2checkboxVal = "checked"
@@ -119,14 +110,6 @@ def action(deviceName, action):
     [startTime_str,stopTime_str] = js.getStartAndStopTime(deviceName)
     startTime = datetime.strptime(startTime_str,"%H:%M").time()
     stopTime = datetime.strptime(stopTime_str,"%H:%M").time()
-    if deviceName == 'white':
-        device = whiteLight
-    elif deviceName == 'rgb':
-        device = rgbLight
-    elif deviceName == 'co2':
-        device = co2system
-    else:
-        return jsonify({'error: unknown device'}),400
 
     status = 'unchanged';
     
@@ -135,11 +118,11 @@ def action(deviceName, action):
             manual = js.getManualOverride(deviceName)
             if manual:
                 js.updateManualOverride(deviceName, False)
-                GPIO.output(device, GPIO.LOW)
+                set_gpio(deviceName, False)
                 status = 'off'
             else:
                 js.updateManualOverride(deviceName, True)
-                GPIO.output(device, GPIO.HIGH)
+                set_gpio(deviceName, True)
                 status = 'on'
 
     return jsonify({'status': status})
@@ -187,5 +170,6 @@ def temperature_chart_data():
     return jsonify(chart_data)
 
 if __name__=='__main__':
-    app.run(debug=True, host='0.0.0.0')
+    app.run(debug=True, use_reloader=False, host='0.0.0.0')
+    #app.run(host='0.0.0.0')
 

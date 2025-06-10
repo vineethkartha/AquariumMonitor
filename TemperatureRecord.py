@@ -32,5 +32,5 @@ def getTemperatureRecord():
 createTable()
 while True:
     enterRecord()
-    #print(getTemperatureRecord())
+    print(getTemperatureRecord())
     time.sleep(600)

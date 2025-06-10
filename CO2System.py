@@ -1,9 +1,10 @@
 import time
-import PinIOModule
+import gpio_client
 import JSONUtilities as js
 import datetime
 
-valve = PinIOModule.PinIOModule(26)
+gpio_client.register("co2", 26)
+
 try:
     while True:
         [startTime_str,stopTime_str] = js.getStartAndStopTime('co2')
@@ -12,10 +13,11 @@ try:
         startTime = datetime.datetime.strptime(startTime_str,"%H:%M").time()
         stopTime = datetime.datetime.strptime(stopTime_str,"%H:%M").time()
         if(curTime >= startTime and curTime <= stopTime):
-            valve.TurnOn()
+            gpio_client.set_gpio("co2", True)
         else:
-            valve.TurnOff()
+            gpio_client.set_gpio("co2", False)
         time.sleep(60)
 except:
-    valve.TurnOff()
+    gpio_client.set_gpio("co2", False)
+
 
