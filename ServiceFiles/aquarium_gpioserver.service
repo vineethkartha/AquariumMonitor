@@ -1,0 +1,13 @@
+[Unit]
+Description=Unix socket based GPIO server
+After=multi-user.target
+
+[Service]
+ExecStart=/usr/bin/python3 /home/vineeth/AquariumMonitor/GPIOServer.py
+Restart=always
+RestartSec=5
+StartLimitIntervalSec=60
+StartLimitBurst=5
+
+[Install]
+WantedBy=multi-user.target

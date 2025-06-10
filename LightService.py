@@ -1,10 +1,10 @@
 import time
-import PinIOModule
-import JSONUtilities as js
+import gpio_client
 import datetime
+import JSONUtilities as js
 
-sunsunLight= PinIOModule.PinIOModule(6)
-rgbLight = PinIOModule.PinIOModule(5)
+gpio_client.register("white", 6)
+gpio_client.register("rgb", 5)
 
 try:
     while True:
@@ -16,9 +16,10 @@ try:
 
         print(startTime_str)
         if(curTime >= startTime and curTime <= stopTime):
-            rgbLight.TurnOn()
+            gpio_client.set_gpio("rgb", True)
         elif manualOverride == False:
-            rgbLight.TurnOff()
+            gpio_client.set_gpio("rgb", False)
+
         [startTime_str,stopTime_str] = js.getStartAndStopTime('white')
         manualOverride = js.getManualOverride('white')
         startTime = datetime.datetime.strptime(startTime_str,"%H:%M").time()
@@ -26,11 +27,12 @@ try:
     
         print(startTime_str)
         if(curTime >= startTime and curTime <= stopTime):
-            sunsunLight.TurnOn()
+            gpio_client.set_gpio("white", True)
         elif manualOverride == False:
-            sunsunLight.TurnOff()
+            gpio_client.set_gpio("white", False)
     
         time.sleep(60)        
 except:
-    sunsunLight.TurnOff()
-    rgbLight.TurnOff()
+    gpio_client.set_gpio("white", False)
+    gpio_client.set_gpio("rgb", False)
+
